@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Select } from "../ui/select";
+import { updateOnboarding } from "@/lib/api";
 import { QuestionCard } from "./question-card";
 
 type StudyMode = "visual" | "audio" | "text";
@@ -47,18 +48,31 @@ export function OnboardingForm() {
       7) *
     100;
 
-  function handleSubmit(event: React.FormEvent) {
+  async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     setSaving(true);
 
-    window.setTimeout(() => {
-      setSaving(false);
-      toast.success("Preferences saved.", {
-        description:
-          "Your tutor will now personalise your study sessions based on your habits.",
+    try {
+      await updateOnboarding({
+        gender: state.gender || undefined,
+        age: state.age || undefined,
+        preferredStudyMode: state.preferredStudyMode || undefined,
+        audioOrText: state.audioOrText || undefined,
+        breakDuration: state.breakDuration || undefined,
+        dailyHours: state.dailyHours || undefined,
+        readerType: state.readerType || undefined,
+      });
+
+      toast.success("Preferences saved!", {
+        description: "Your tutor will now adapt sessions to your reading habit.",
       });
       router.push("/dashboard");
-    }, 900);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Failed to save preferences.";
+      toast.error("Save failed", { description: message });
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -68,7 +82,7 @@ export function OnboardingForm() {
     >
       <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-1">
-          <h2 className="text-lg font-semibold tracking-tight">
+          <h2 className="text-lg font-semibold tracking-tight text-slate-900">
             Help us understand how you learn
           </h2>
           <p className="text-sm text-muted-foreground">
@@ -152,11 +166,10 @@ export function OnboardingForm() {
         >
           <button
             type="button"
-            className={`flex-1 rounded-full border px-3 py-2 text-xs font-medium transition ${
-              state.audioOrText === "audio"
-                ? "border-primary bg-primary-soft text-primary"
-                : "border-border bg-white text-muted-foreground hover:bg-muted"
-            }`}
+            className={`flex-1 rounded-full border px-3 py-2 text-xs font-medium transition ${state.audioOrText === "audio"
+              ? "border-primary bg-primary-soft text-primary"
+              : "border-border bg-white text-muted-foreground hover:bg-muted"
+              }`}
             onClick={() =>
               setState((prev) => ({ ...prev, audioOrText: "audio" }))
             }
@@ -165,11 +178,10 @@ export function OnboardingForm() {
           </button>
           <button
             type="button"
-            className={`flex-1 rounded-full border px-3 py-2 text-xs font-medium transition ${
-              state.audioOrText === "text"
-                ? "border-primary bg-primary-soft text-primary"
-                : "border-border bg-white text-muted-foreground hover:bg-muted"
-            }`}
+            className={`flex-1 rounded-full border px-3 py-2 text-xs font-medium transition ${state.audioOrText === "text"
+              ? "border-primary bg-primary-soft text-primary"
+              : "border-border bg-white text-muted-foreground hover:bg-muted"
+              }`}
             onClick={() =>
               setState((prev) => ({ ...prev, audioOrText: "text" }))
             }
@@ -180,7 +192,7 @@ export function OnboardingForm() {
 
         <QuestionCard
           title="Focus and break pattern"
-          description="How long can you read before taking a break, and how many hours can you spend on your books per day."
+          description="How long can you read before taking a break, and study hours per day."
         >
           <Select
             label="How long can you read before a break"
@@ -201,7 +213,7 @@ export function OnboardingForm() {
             ]}
           />
           <Select
-            label="How many hours can you study in a day"
+            label="Study hours in a day"
             name="dailyHours"
             value={state.dailyHours}
             onChange={(event) =>
@@ -213,8 +225,8 @@ export function OnboardingForm() {
             options={[
               { label: "Select hours", value: "" },
               { label: "Less than 1 hour", value: "<1" },
-              { label: "1 &ndash; 2 hours", value: "1-2" },
-              { label: "2 &ndash; 4 hours", value: "2-4" },
+              { label: "1 hour - 2 hours", value: "1-2" },
+              { label: "2 hour - 4 hours", value: "2-4" },
               { label: "More than 4 hours", value: "4+" },
             ]}
           />
@@ -226,11 +238,10 @@ export function OnboardingForm() {
         >
           <button
             type="button"
-            className={`flex-1 rounded-full border px-3 py-2 text-xs font-medium transition ${
-              state.readerType === "day"
-                ? "border-primary bg-primary-soft text-primary"
-                : "border-border bg-white text-muted-foreground hover:bg-muted"
-            }`}
+            className={`flex-1 rounded-full border px-3 py-2 text-xs font-medium transition ${state.readerType === "day"
+              ? "border-primary bg-primary-soft text-primary"
+              : "border-border bg-white text-muted-foreground hover:bg-muted"
+              }`}
             onClick={() =>
               setState((prev) => ({ ...prev, readerType: "day" }))
             }
@@ -239,11 +250,10 @@ export function OnboardingForm() {
           </button>
           <button
             type="button"
-            className={`flex-1 rounded-full border px-3 py-2 text-xs font-medium transition ${
-              state.readerType === "night"
-                ? "border-primary bg-primary-soft text-primary"
-                : "border-border bg-white text-muted-foreground hover:bg-muted"
-            }`}
+            className={`flex-1 rounded-full border px-3 py-2 text-xs font-medium transition ${state.readerType === "night"
+              ? "border-primary bg-primary-soft text-primary"
+              : "border-border bg-white text-muted-foreground hover:bg-muted"
+              }`}
             onClick={() =>
               setState((prev) => ({ ...prev, readerType: "night" }))
             }
@@ -252,23 +262,22 @@ export function OnboardingForm() {
           </button>
           <button
             type="button"
-            className={`flex-1 rounded-full border px-3 py-2 text-xs font-medium transition ${
-              state.readerType === "both"
-                ? "border-primary bg-primary-soft text-primary"
-                : "border-border bg-white text-muted-foreground hover:bg-muted"
-            }`}
+            className={`flex-1 rounded-full border px-3 py-2 text-xs font-medium transition ${state.readerType === "both"
+              ? "border-primary bg-primary-soft text-primary"
+              : "border-border bg-white text-muted-foreground hover:bg-muted"
+              }`}
             onClick={() =>
               setState((prev) => ({ ...prev, readerType: "both" }))
             }
           >
-            It depends on my schedule
+            Mixed
           </button>
         </QuestionCard>
       </div>
 
       <footer className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-xs text-muted-foreground">
-          These answers are used to customise your pacing, content type, and study reminders.
+          Your answers personalise pacing, content type, and reminders.
         </p>
         <Button type="submit" loading={saving}>
           Finish setup and enter dashboard
@@ -277,4 +286,3 @@ export function OnboardingForm() {
     </form>
   );
 }
-

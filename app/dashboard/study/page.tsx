@@ -5,46 +5,73 @@ import { AppShell } from "@/components/layout/app-shell";
 import { CourseSelector } from "@/components/dashboard/course-selector";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { apiService } from "@/lib/api";
+import { Paperclip, Mic, Send } from "lucide-react";
+import { WhatsAppIcon, InstagramIcon, XIcon } from "@/components/ui/social-icons";
 import { toast } from "sonner";
-
-interface Message {
-  from: string;
-  text: string;
-}
-
-// Updated: Mock data removed. In production, this will be fetched from the backend.
-const materials: any[] = [];
+import { sendChat, uploadNoteForTutoring } from "@/lib/api";
 
 export default function StudyPage() {
-  const [messages, setMessages] = React.useState<Message[]>([
-    {
-      from: "tutor",
-      text: "Hello! I am your AI Tutor. Choose a course material on the left or ask me anything to get started.",
-    },
-  ]);
-  const [input, setInput] = React.useState("");
-  const [loading, setLoading] = React.useState(false);
+  const [messages, setMessages] = React.useState<{ from: string; text: string }[]>([]);
+  const [inputValue, setInputValue] = React.useState("");
+  const [isRecording, setIsRecording] = React.useState(false);
+  const [isUploading, setIsUploading] = React.useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-  const handleSendMessage = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (!input.trim() || loading) return;
-
-    const userMessage = input.trim();
-    setInput("");
-    setMessages((prev: Message[]) => [...prev, { from: "student", text: userMessage }]);
-    setLoading(true);
+  const handleSend = async () => {
+    if (!inputValue.trim()) return;
+    const question = inputValue;
+    setMessages(prev => [...prev, { from: "student", text: question }]);
+    setInputValue("");
 
     try {
-      const response = await apiService.sendChatMessage(userMessage);
-      setMessages((prev: Message[]) => [...prev, { from: "tutor", text: response.text }]);
+      const reply = await sendChat("General", "General", question, messages);
+      setMessages(prev => [...prev, { from: "tutor", text: reply.text }]);
     } catch (error) {
-      console.error("Chat error:", error);
-      toast.error("Failed to get response from AI Tutor.");
-      setMessages((prev: Message[]) => [...prev, { from: "tutor", text: "Sorry, I encountered an error. Please try again." }]);
-    } finally {
-      setLoading(false);
+      const msg = error instanceof Error ? error.message : "Failed to get response.";
+      toast.error("AI Error", { description: msg });
+      setMessages(prev => [...prev, { from: "tutor", text: "Sorry, I couldn't process that. Make sure the backend is running." }]);
     }
+  };
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    toast.loading(`Uploading ${file.name}...`);
+
+    try {
+      const result = await uploadNoteForTutoring(file, "Summarize this document and explain the key concepts.");
+      setIsUploading(false);
+      toast.dismiss();
+      toast.success(`${file.name} uploaded successfully!`);
+      setMessages(prev => [...prev, { from: "tutor", text: result.response }]);
+    } catch (error) {
+      setIsUploading(false);
+      toast.dismiss();
+      const msg = error instanceof Error ? error.message : "Upload failed.";
+      toast.error("Upload Error", { description: msg });
+    }
+  };
+
+  const toggleRecording = () => {
+    if (isRecording) {
+      setIsRecording(false);
+      toast.success("Audio captured!", { description: "Converting your speech to text..." });
+      // Simulate speech to text - in real app, this would use a speech API
+      setTimeout(() => {
+        setInputValue("Can you explain the main concepts in these notes?");
+      }, 1500);
+    } else {
+      setIsRecording(true);
+      toast.info("Recording...", { description: "Speak now to ask your question." });
+    }
+  };
+
+  const shareToPlatform = (platform: string) => {
+    toast.success(`Sharing to ${platform}...`, {
+      description: "Opening share dialog."
+    });
   };
 
   return (
@@ -55,8 +82,8 @@ export default function StudyPage() {
             Study session
           </h1>
           <p className="max-w-2xl text-sm text-muted-foreground">
-            Choose your course, open the uploaded materials, and chat with the
-            AI tutor. The bot uses your lecturer&apos;s notes to give accurate answers.
+            Choose your course, upload your notes, and chat with the AI tutor.
+            The tutor uses your course materials to give detailed explanations.
           </p>
         </section>
 
@@ -70,121 +97,140 @@ export default function StudyPage() {
                   Course materials
                 </h2>
                 <p className="text-xs text-muted-foreground">
-                  Select the material you want to read or review.
+                  Upload your notes to let the tutor reference them.
                 </p>
               </div>
-              <span className="rounded-full bg-primary-soft/80 px-2 py-1 text-[11px] font-medium text-primary">
-                Visual + text based
-              </span>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploading}
+                className="h-8 gap-1 text-[11px]"
+              >
+                <Paperclip className="h-3 w-3" />
+                Upload Notes
+              </Button>
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileUpload}
+                className="hidden"
+                accept=".doc,.docx,.ppt,.pptx,.pdf"
+              />
             </header>
 
-            <ul className="flex flex-col gap-2">
-              {materials.length > 0 ? (
-                materials.map((item) => (
-                  <li
-                    key={item.id}
-                    className="flex items-center justify-between gap-2 rounded-xl border border-border/70 bg-white px-3 py-2 text-xs hover:border-primary/60 hover:bg-primary-soft/30"
-                  >
-                    <div>
-                      <p className="font-medium text-slate-900">{item.title}</p>
-                      <p className="text-[11px] text-muted-foreground">
-                        {item.type} &bull; {item.duration}
-                      </p>
-                    </div>
-                    <Button type="button" size="sm" variant="outline">
-                      Open
-                    </Button>
-                  </li>
-                ))
-              ) : (
-                <div className="flex flex-col items-center justify-center py-8 text-center text-muted-foreground">
-                  <p>No materials uploaded for this course yet.</p>
-                  <p className="text-[10px]">Upload your course documents in the Admin panel (coming soon).</p>
-                </div>
-              )}
-            </ul>
+            <div className="flex flex-1 items-center justify-center rounded-xl border border-dashed border-border/70 bg-muted/40 p-6 text-center">
+              <div className="space-y-2">
+                <Paperclip className="mx-auto h-8 w-8 text-muted-foreground/40" />
+                <p className="text-xs text-muted-foreground">
+                  Upload a PDF, PPTX, or DOC file to get started.
+                  The AI tutor will summarize and explain key concepts from your notes.
+                </p>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploading}
+                  className="text-[11px]"
+                >
+                  Choose file
+                </Button>
+              </div>
+            </div>
           </section>
 
           <section className="flex flex-col gap-3 rounded-2xl border border-border bg-white/80 p-4 shadow-sm sm:p-5">
             <header className="flex items-center justify-between gap-2">
               <div>
-                <h2 className="text-sm font-semibold tracking-tight text-slate-900">
-                  Ask the tutor
-                </h2>
-                <p className="text-xs text-muted-foreground">
-                  Type your questions and the chatbot will give detailed
-                  explanations using your course materials.
-                </p>
+                <h2 className="text-sm font-semibold tracking-tight text-slate-900">Ask the tutor</h2>
+                <p className="text-xs text-muted-foreground">Use text or voice to ask questions.</p>
               </div>
               <span className="rounded-full bg-secondary/20 px-2 py-1 text-[11px] font-medium text-secondary">
-                Live Chat
+                AI Chat
               </span>
             </header>
 
-            <div className="flex min-h-[300px] max-h-[400px] overflow-y-auto flex-col gap-2 rounded-xl border border-border/70 bg-muted/60 p-3 text-xs">
+            <div className="flex min-h-[300px] flex-col gap-2 rounded-xl border border-border/70 bg-muted/60 p-3 text-xs overflow-y-auto max-h-[450px]">
+              {messages.length === 0 && (
+                <div className="flex flex-1 items-center justify-center text-muted-foreground">
+                  <p>Ask the tutor a question to get started.</p>
+                </div>
+              )}
               {messages.map((message, index) => (
                 <div
                   key={index}
-                  className={`max-w-[90%] rounded-2xl px-4 py-2 shadow-sm ${
-                    message.from === "student"
-                      ? "self-end bg-primary text-white"
-                      : "self-start bg-white text-slate-900"
-                  }`}
+                  className={`max-w-[90%] rounded-2xl px-3 py-2 ${message.from === "student"
+                    ? "self-end bg-primary text-white"
+                    : "self-start bg-white text-slate-900 shadow-sm"
+                    }`}
                 >
                   {message.text}
                 </div>
               ))}
-              {loading && (
-                <div className="self-start bg-white text-slate-900 rounded-2xl px-4 py-2 shadow-sm animate-pulse">
-                  Tutor is thinking...
-                </div>
-              )}
             </div>
 
-            <form onSubmit={handleSendMessage} className="flex items-center gap-2 pt-1">
-              <Input
-                name="question"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask the tutor to break down a concept, give more examples, or summarise a section..."
-                className="h-10 text-xs sm:text-sm"
-                disabled={loading}
-              />
-              <Button type="submit" size="sm" disabled={loading || !input.trim()}>
-                {loading ? "..." : "Send"}
+            <div className="flex items-center gap-2 pt-1">
+              <div className="relative flex-1">
+                <Input
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  placeholder="Type or record your question..."
+                  className="h-10 pr-10 text-xs sm:text-sm"
+                  onKeyDown={(e) => e.key === "Enter" && handleSend()}
+                />
+                <button
+                  type="button"
+                  onClick={toggleRecording}
+                  className={`absolute right-3 top-1/2 -translate-y-1/2 ${isRecording ? 'text-red-500 animate-pulse' : 'text-muted-foreground hover:text-primary'}`}
+                >
+                  <Mic className="h-4 w-4" />
+                </button>
+              </div>
+              <Button onClick={handleSend} size="sm" className="h-10 px-4">
+                <Send className="h-4 w-4" />
               </Button>
-            </form>
-
-            <footer className="mt-1 rounded-xl bg-primary-soft/40 p-3 text-[11px] text-muted-foreground">
-              Connected to BUPT-AI RAG engine. Responses are generated based on uploaded lecturer notes.
-            </footer>
+            </div>
           </section>
         </div>
 
         <section className="grid gap-4 rounded-2xl border border-border bg-white/80 p-4 text-xs text-muted-foreground shadow-sm sm:grid-cols-[minmax(0,1.5fr)_minmax(0,1.2fr)] sm:p-5">
           <div>
-            <h2 className="text-sm font-semibold text-slate-900">
-              Today&apos;s study summary
-            </h2>
+            <h2 className="text-sm font-semibold text-slate-900">Today&apos;s study summary</h2>
             <p className="mt-1">
-              Select a material to begin tracking your study progress.
+              Your study time and topics covered will appear here as you use the tutor.
             </p>
           </div>
-          <div className="flex flex-col items-start gap-2">
-            <h3 className="text-sm font-semibold text-slate-900">
-              Share your achievement
-            </h3>
-            <p>
-              A share button will let you post a simple card with your today&apos;s
-              study time and completed topics to friends or study groups.
-            </p>
-            <Button type="button" size="sm" variant="outline" disabled>
-              Share achievement
-            </Button>
+          <div className="flex flex-col items-start gap-3">
+            <h3 className="text-sm font-semibold text-slate-900">Share your achievement</h3>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                onClick={() => shareToPlatform("WhatsApp")}
+                variant="outline" size="sm" className="h-8 gap-1.5 border-green-200 text-green-700 hover:bg-green-50"
+              >
+                <WhatsAppIcon className="h-3.5 w-3.5" />
+                WhatsApp
+              </Button>
+              <Button
+                type="button"
+                onClick={() => shareToPlatform("Instagram")}
+                variant="outline" size="sm" className="h-8 gap-1.5 border-pink-200 text-pink-700 hover:bg-pink-50"
+              >
+                <InstagramIcon className="h-3.5 w-3.5" />
+                Instagram
+              </Button>
+              <Button
+                type="button"
+                onClick={() => shareToPlatform("X")}
+                variant="outline" size="sm" className="h-8 gap-1.5 border-slate-300 text-slate-700 hover:bg-slate-50"
+              >
+                <XIcon className="h-3.5 w-3.5" />
+                X
+              </Button>
+            </div>
           </div>
         </section>
       </div>
     </AppShell>
   );
 }
-

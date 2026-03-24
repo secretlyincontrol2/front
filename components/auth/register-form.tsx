@@ -5,22 +5,21 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-
-import { apiService } from "@/lib/api";
+import { registerUser } from "@/lib/api";
 
 interface FieldErrors {
-  lastname?: string;
-  firstname?: string;
-  middlename?: string;
+  lastName?: string;
+  firstName?: string;
+  middleName?: string;
   matricNumber?: string;
-  schoolEmail?: string;
+  email?: string;
   password?: string;
   confirmPassword?: string;
 }
 
 function isStrongPassword(password: string) {
   return (
-    password.length > 8 &&
+    password.length >= 8 &&
     /[A-Z]/.test(password) &&
     /[a-z]/.test(password) &&
     /\d/.test(password) &&
@@ -33,37 +32,38 @@ export function RegisterForm() {
   const [loading, setLoading] = React.useState(false);
   const [errors, setErrors] = React.useState<FieldErrors>({});
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
 
     const data = {
-      lastname: String(formData.get("lastname") || "").trim(),
-      firstname: String(formData.get("firstname") || "").trim(),
-      middlename: String(formData.get("middlename") || "").trim(),
+      lastName: String(formData.get("lastName") || "").trim(),
+      firstName: String(formData.get("firstName") || "").trim(),
+      middleName: String(formData.get("middleName") || "").trim(),
       matricNumber: String(formData.get("matricNumber") || "").trim(),
-      schoolEmail: String(formData.get("schoolEmail") || "").trim(),
+      email: String(formData.get("email") || "").trim(),
       password: String(formData.get("password") || ""),
       confirmPassword: String(formData.get("confirmPassword") || ""),
     };
 
     const nextErrors: FieldErrors = {};
 
-    if (!data.lastname) nextErrors.lastname = "Last name is required.";
-    if (!data.firstname) nextErrors.firstname = "First name is required.";
-    if (!data.matricNumber)
+    if (!data.lastName) nextErrors.lastName = "Last name is required.";
+    if (!data.firstName) nextErrors.firstName = "First name is required.";
+    if (!data.matricNumber) {
       nextErrors.matricNumber = "Matric number is required.";
-    if (!data.schoolEmail) {
-      nextErrors.schoolEmail = "School email is required.";
-    } else if (!data.schoolEmail.endsWith(".edu.ng")) {
-      nextErrors.schoolEmail = "Use your school email address.";
+    }
+    if (!data.email) {
+      nextErrors.email = "School email is required.";
+    } else if (!data.email.endsWith(".edu.ng")) {
+      nextErrors.email = "Use your school email address.";
     }
 
     if (!data.password) {
       nextErrors.password = "Password is required.";
     } else if (!isStrongPassword(data.password)) {
       nextErrors.password =
-        "Password must be more than 8 characters and include capital letters, small letters, numbers, and a special character.";
+        "Password must be at least 8 characters and include uppercase, lowercase, number, and special character.";
     }
 
     if (!data.confirmPassword) {
@@ -78,23 +78,26 @@ export function RegisterForm() {
 
     setLoading(true);
 
-    apiService.register(data)
-      .then(() => {
-        toast.success("Account created successfully!", {
-          description: "Please log in with your credentials.",
-        });
-        router.push("/login");
-      })
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .catch((error: any) => {
-        console.error("Registration error:", error);
-        toast.error("Registration failed", {
-          description: error.message || "Please check your details and try again.",
-        });
-      })
-      .finally(() => {
-        setLoading(false);
+    try {
+      await registerUser({
+        lastname: data.lastName,
+        firstname: data.firstName,
+        middlename: data.middleName || undefined,
+        matricNumber: data.matricNumber,
+        schoolEmail: data.email,
+        password: data.password,
       });
+
+      toast.success("Account created successfully!", {
+        description: "You can now log in with your matric number and password.",
+      });
+      router.push("/login");
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Registration failed.";
+      toast.error("Registration failed", { description: message });
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -103,7 +106,7 @@ export function RegisterForm() {
       className="flex w-full flex-col gap-4 rounded-2xl border border-border bg-white/80 p-5 shadow-sm backdrop-blur-sm sm:p-6"
     >
       <div className="space-y-1">
-        <h2 className="text-lg font-semibold tracking-tight">
+        <h2 className="text-lg font-semibold tracking-tight text-slate-900">
           Create your study account
         </h2>
         <p className="text-sm text-muted-foreground">
@@ -113,23 +116,23 @@ export function RegisterForm() {
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Input
-          name="lastname"
+          name="lastName"
           label="Last name"
           autoComplete="family-name"
-          error={errors.lastname}
+          error={errors.lastName}
         />
         <Input
-          name="firstname"
+          name="firstName"
           label="First name"
           autoComplete="given-name"
-          error={errors.firstname}
+          error={errors.firstName}
         />
         <Input
-          name="middlename"
+          name="middleName"
           label="Middle name"
           autoComplete="additional-name"
           hint="Optional"
-          error={errors.middlename}
+          error={errors.middleName}
         />
         <Input
           name="matricNumber"
@@ -141,12 +144,12 @@ export function RegisterForm() {
       </div>
 
       <Input
-        name="schoolEmail"
+        name="email"
         type="email"
         label="School email"
         placeholder="firstname.lastname@babcock.edu.ng"
         autoComplete="email"
-        error={errors.schoolEmail}
+        error={errors.email}
       />
 
       <div className="grid gap-4 sm:grid-cols-2">
@@ -156,7 +159,7 @@ export function RegisterForm() {
           label="Password"
           autoComplete="new-password"
           error={errors.password}
-          hint="More than 8 characters, with capital letters, small letters, numbers, and a special character."
+          hint="At least 8 characters, with uppercase, lowercase, number, and special character."
         />
         <Input
           name="confirmPassword"
@@ -169,14 +172,13 @@ export function RegisterForm() {
 
       <div className="flex flex-col gap-3 pt-1 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-xs text-muted-foreground">
-          By creating an account you agree that your learning data will be used
-          to personalize your sessions.
+          Already have an account?{" "}
+          <a href="/login" className="text-primary underline">Sign in</a>
         </p>
         <Button type="submit" loading={loading}>
-          Continue to login
+          Create account
         </Button>
       </div>
     </form>
   );
 }
-

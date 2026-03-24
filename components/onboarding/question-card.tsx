@@ -16,7 +16,7 @@ export function QuestionCard({
   return (
     <section className="flex flex-col gap-3 rounded-2xl border border-border bg-white/80 p-4 shadow-sm sm:p-5">
       <div className="space-y-1">
-        <h3 className="text-sm font-semibold tracking-tight text-foreground">
+        <h3 className="text-sm font-semibold tracking-tight text-slate-900">
           {title}
         </h3>
         {description && (
@@ -27,4 +27,3 @@ export function QuestionCard({
     </section>
   );
 }
-
