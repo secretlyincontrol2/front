@@ -10,3 +10,5 @@ services:
         value: https://cyntigdggdg.onrender.com
       - key: NODE_ENV
         value: production
+      - key: HOSTNAME
+        value: 0.0.0.0
