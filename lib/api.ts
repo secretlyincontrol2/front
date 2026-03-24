@@ -11,7 +11,7 @@ import { getToken } from "./auth";
 // ──────────────────────────────────────────────────────────────
 // On Render, the Node app proxies /api/ai to port 3002.
 // So we can use the same base URL for everything.
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://cyntigdggdg.onrender.com/api";
 
 // ═══════════════════════════════════════════════════════════════
 //  HELPERS
