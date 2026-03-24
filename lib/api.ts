@@ -206,7 +206,7 @@ export async function updateProgress(
 }
 
 export async function updateOnboarding(payload: Record<string, unknown>): Promise<unknown> {
-    return apiFetch<unknown>("/auth/onboarding", {
+    return apiFetch<unknown>("/onboarding", {
         method: "POST",
         body: JSON.stringify(payload),
     });
