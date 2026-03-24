@@ -10,7 +10,10 @@ import { WhatsAppIcon, InstagramIcon, XIcon } from "@/components/ui/social-icons
 import { toast } from "sonner";
 import { sendChat, uploadNoteForTutoring } from "@/lib/api";
 
+import { useCourseSelection } from "@/lib/hooks/use-course-selection";
+
 export default function StudyPage() {
+  const { selection } = useCourseSelection();
   const [messages, setMessages] = React.useState<{ from: string; text: string }[]>([]);
   const [inputValue, setInputValue] = React.useState("");
   const [isRecording, setIsRecording] = React.useState(false);
@@ -24,7 +27,12 @@ export default function StudyPage() {
     setInputValue("");
 
     try {
-      const reply = await sendChat("General", "General", question, messages);
+      const reply = await sendChat(
+        selection.department || "General",
+        selection.course || "General",
+        question,
+        messages
+      );
       setMessages(prev => [...prev, { from: "tutor", text: reply.text }]);
     } catch (error) {
       const msg = error instanceof Error ? error.message : "Failed to get response.";
@@ -41,7 +49,11 @@ export default function StudyPage() {
     toast.loading(`Uploading ${file.name}...`);
 
     try {
-      const result = await uploadNoteForTutoring(file, "Summarize this document and explain the key concepts.");
+      const result = await uploadNoteForTutoring(
+        file,
+        "Summarize this document and explain the key concepts.",
+        selection.course || "General"
+      );
       setIsUploading(false);
       toast.dismiss();
       toast.success(`${file.name} uploaded successfully!`);

@@ -200,3 +200,6 @@ export async function updateOnboarding(payload: any): Promise<any> {
         body: JSON.stringify(payload),
     });
 }
+export async function getCourses(): Promise<{ departments: any[] }> {
+    return apiFetch<{ departments: any[] }>("/ai/courses");
+}

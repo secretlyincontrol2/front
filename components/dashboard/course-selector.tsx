@@ -1,46 +1,31 @@
 "use client";
 
-import * as React from "react";
-import { Select } from "@/components/ui/select";
-
-const departments = [
-  { label: "Select department", value: "" },
-  { label: "Computer Science", value: "cs" },
-  { label: "Software Engineering", value: "se" },
-  { label: "Information Technology", value: "it" },
-  { label: "Accounting", value: "acc" },
-  { label: "Nursing Science", value: "nur" },
-];
-
-const coursesByDepartment: Record<string, { label: string; value: string }[]> =
-  {
-    cs: [
-      { label: "CSC 101 &ndash; Introduction to Computing", value: "csc101" },
-      { label: "CSC 205 &ndash; Data Structures", value: "csc205" },
-      { label: "CSC 207 &ndash; Computer Architecture", value: "csc207" },
-    ],
-    se: [
-      { label: "SENG 201 &ndash; Software Modelling", value: "seng201" },
-      { label: "SENG 203 &ndash; Web Engineering", value: "seng203" },
-    ],
-    it: [
-      { label: "IT 101 &ndash; Digital Literacy", value: "it101" },
-      { label: "IT 203 &ndash; Networking Fundamentals", value: "it203" },
-    ],
-    acc: [
-      { label: "ACC 101 &ndash; Principles of Accounting", value: "acc101" },
-      { label: "ACC 203 &ndash; Cost Accounting", value: "acc203" },
-    ],
-    nur: [
-      { label: "NUR 101 &ndash; Fundamentals of Nursing", value: "nur101" },
-      { label: "NUR 205 &ndash; Anatomy and Physiology", value: "nur205" },
-    ],
-  };
+import { useCourseSelection } from "@/lib/hooks/use-course-selection";
+import { getCourses } from "@/lib/api";
+import { toast } from "sonner";
 
 export function CourseSelector() {
-  const [department, setDepartment] = React.useState("");
-  const [course, setCourse] = React.useState("");
+  const { selection, updateSelection } = useCourseSelection();
+  const [data, setData] = React.useState<{ departments: any[] }>({ departments: [] });
+  const [loading, setLoading] = React.useState(true);
 
+  React.useEffect(() => {
+    async function loadCourses() {
+      try {
+        const res = await getCourses();
+        setData(res);
+      } catch (error) {
+        console.error("Failed to load courses", error);
+        toast.error("Connectivity Error", { description: "Failed to fetch course list from backend." });
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadCourses();
+  }, []);
+
+  const currentDept = data.departments.find(d => d.value === selection.department);
+  const availableCourses = currentDept?.courses || [];
 
   return (
     <section className="flex flex-col gap-3 rounded-2xl border border-border bg-white/80 p-4 shadow-sm sm:p-5">
@@ -57,38 +42,38 @@ export function CourseSelector() {
         <Select
           label="Department"
           name="department"
-          value={department}
+          value={selection.department}
           onChange={(event) => {
-            setDepartment(event.target.value);
-            setCourse("");
+            updateSelection({ department: event.target.value, course: "", courseLabel: "" });
           }}
-          options={departments}
+          disabled={loading}
+          options={[
+            { label: loading ? "Loading..." : "Select department", value: "" },
+            ...data.departments.map(d => ({ label: d.label, value: d.value }))
+          ]}
         />
         <Select
           label="Course"
           name="course"
-          value={course}
-          onChange={(event) => setCourse(event.target.value)}
-          options={
-            department
-              ? [
-                  { label: "Select a course", value: "" },
-                  ...(coursesByDepartment[department] || []),
-                ]
-              : [{ label: "Select department first", value: "" }]
-          }
+          value={selection.course}
+          onChange={(event) => {
+            const courseVal = event.target.value;
+            const label = availableCourses.find((c: any) => c.value === courseVal)?.label || "";
+            updateSelection({ course: courseVal, courseLabel: label });
+          }}
+          disabled={loading || !selection.department}
+          options={[
+            { label: selection.department ? "Select a course" : "Select department first", value: "" },
+            ...availableCourses.map((c: any) => ({ label: c.label, value: c.value }))
+          ]}
         />
       </div>
 
-      {department && course && (
+      {selection.department && selection.course && (
         <p className="text-xs font-medium text-primary">
           You have selected{" "}
           <span className="underline decoration-secondary">
-            {
-              (coursesByDepartment[department] || []).find(
-                (c) => c.value === course,
-              )?.label
-            }
+            {selection.courseLabel}
           </span>{" "}
           for this session.
         </p>

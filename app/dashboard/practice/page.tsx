@@ -11,7 +11,10 @@ import { generatePractice, updateProgress } from "@/lib/api";
 import type { PracticeQuestion } from "@/lib/api";
 import { getUser } from "@/lib/auth";
 
+import { useCourseSelection } from "@/lib/hooks/use-course-selection";
+
 export default function PracticePage() {
+  const { selection } = useCourseSelection();
   const [loading, setLoading] = React.useState(false);
   const [questions, setQuestions] = React.useState<PracticeQuestion[]>([]);
   const [currentIndex, setCurrentIndex] = React.useState(0);
@@ -19,22 +22,24 @@ export default function PracticePage() {
   const [showResult, setShowResult] = React.useState(false);
   const [score, setScore] = React.useState({ correct: 0, total: 0 });
   const [practiceStarted, setPracticeStarted] = React.useState(false);
-  const [selectedDepartment, setSelectedDepartment] = React.useState("");
-  const [selectedCourse, setSelectedCourse] = React.useState("");
 
   const currentQuestion = questions[currentIndex];
 
-  const startPractice = async (department: string, course: string) => {
-    if (!department || !course) {
+  const startPractice = async () => {
+    if (!selection.department || !selection.course) {
       toast.error("Selection required", { description: "Please select a department and course first." });
       return;
     }
     setLoading(true);
-    setSelectedDepartment(department);
-    setSelectedCourse(course);
 
     try {
-      const result = await generatePractice(department, course, "general", 5, "medium");
+      const result = await generatePractice(
+        selection.department,
+        selection.course,
+        "general",
+        5,
+        "medium"
+      );
       setQuestions(result.questions);
       setCurrentIndex(0);
       setScore({ correct: 0, total: 0 });
@@ -64,7 +69,7 @@ export default function PracticePage() {
     const user = getUser();
     if (user?._id) {
       try {
-        await updateProgress(user._id, selectedCourse, "general", isCorrect);
+        await updateProgress(user._id, selection.course, "general", isCorrect);
       } catch {
         // Progress update failed silently
       }
@@ -132,7 +137,7 @@ export default function PracticePage() {
             </div>
             <Button
               disabled={loading}
-              onClick={() => startPractice("General", "General")}
+              onClick={() => startPractice()}
             >
               {loading ? "Generating..." : "Start Practice Session"}
             </Button>
