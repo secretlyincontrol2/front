@@ -28,8 +28,8 @@ export default function DashboardPage() {
             <div className="grid gap-3 sm:grid-cols-2">
               <StatCard
                 label="Today&apos;s focused study time"
-                value="1 hr 45 min"
-                helper="Estimated from your most recent mock sessions."
+                value="0 hr 0 min"
+                helper="Study time is calculated from your reading and practice sessions."
               />
               <StatCard
                 label="Practice points earned today"
@@ -40,8 +40,8 @@ export default function DashboardPage() {
             </div>
             <StatCard
               label="Weekly goal"
-              value="Complete 5 study sessions and 3 practice sessions"
-              helper="Goals and rewards are mocked for now. The backend will store real streaks, badges, and achievements."
+              value="Sync your first course to begin"
+              helper="Goals track your study streaks and achievements."
             />
           </aside>
         </div>

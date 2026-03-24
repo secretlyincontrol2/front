@@ -1,6 +1,8 @@
 import { AppShell } from "@/components/layout/app-shell";
 import { Button } from "@/components/ui/button";
 
+import Link from "next/link";
+
 export default function Home() {
   return (
     <AppShell showAuthCta>
@@ -22,10 +24,9 @@ export default function Home() {
           </div>
 
           <div className="flex flex-wrap items-center gap-3 pt-2">
-            <Button size="lg">Get started with your school email</Button>
-            <p className="text-xs text-muted-foreground">
-              No backend yet &mdash; this is a fully interactive UI mock.
-            </p>
+            <Link href="/register">
+              <Button size="lg">Get started with your school email</Button>
+            </Link>
           </div>
 
           <dl className="grid gap-4 pt-4 text-sm sm:grid-cols-3">

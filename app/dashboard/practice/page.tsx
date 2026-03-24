@@ -4,14 +4,10 @@ import { AppShell } from "@/components/layout/app-shell";
 import { CourseSelector } from "@/components/dashboard/course-selector";
 import { Button } from "@/components/ui/button";
 
-const mockTopics = [
-  { id: "basics", label: "Topic 1 &ndash; Basics", questions: 5 },
-  { id: "diagrams", label: "Topic 2 &ndash; Diagrams", questions: 5 },
-  { id: "applications", label: "Topic 3 &ndash; Applications", questions: 5 },
-];
+// Updated: Mock data removed. In production, topics will be fetched based on course selection.
+const topics: any[] = [];
 
-const mockQuestion =
-  "The animated character will read this question out loud. In the real app, this will include diagrams and images to support your understanding.";
+const questionPlaceholder = "Select a topic and course to begin your practice session. The animated character will read questions out loud once loaded.";
 
 export default function PracticePage() {
   return (
@@ -47,27 +43,33 @@ export default function PracticePage() {
             </header>
 
             <ul className="flex flex-col gap-2 text-xs">
-              {mockTopics.map((topic, index) => (
-                <li
-                  key={topic.id}
-                  className={`flex items-center justify-between gap-2 rounded-xl border px-3 py-2 ${
-                    index === 0
-                      ? "border-primary bg-primary-soft/40"
-                      : "border-border bg-white hover:border-primary/60 hover:bg-primary-soft/20"
-                  }`}
-                >
-                  <div>
-                    <p className="font-medium text-slate-900">{topic.label}</p>
-                    <p className="text-[11px] text-muted-foreground">
-                      {topic.questions} questions &bull; animated character +
-                      diagrams
-                    </p>
-                  </div>
-                  <Button type="button" size="sm" variant="outline">
-                    {index === 0 ? "In progress" : "Start"}
-                  </Button>
-                </li>
-              ))}
+              {topics.length > 0 ? (
+                topics.map((topic, index) => (
+                  <li
+                    key={topic.id}
+                    className={`flex items-center justify-between gap-2 rounded-xl border px-3 py-2 ${
+                      index === 0
+                        ? "border-primary bg-primary-soft/40"
+                        : "border-border bg-white hover:border-primary/60 hover:bg-primary-soft/20"
+                    }`}
+                  >
+                    <div>
+                      <p className="font-medium text-slate-900">{topic.label}</p>
+                      <p className="text-[11px] text-muted-foreground">
+                        {topic.questions} questions &bull; animated character + diagrams
+                      </p>
+                    </div>
+                    <Button type="button" size="sm" variant="outline">
+                      {index === 0 ? "In progress" : "Start"}
+                    </Button>
+                  </li>
+                ))
+              ) : (
+                <div className="flex flex-col items-center justify-center py-8 text-center text-muted-foreground">
+                  <p>No practice topics available for this course.</p>
+                  <p className="text-[10px]">Select a different course above or check back later.</p>
+                </div>
+              )}
             </ul>
           </div>
 
@@ -83,7 +85,7 @@ export default function PracticePage() {
                 </p>
               </div>
               <span className="rounded-full bg-secondary/20 px-2 py-1 text-[11px] font-medium text-secondary">
-                Audio + visual mock
+                Audio + visual feedback
               </span>
             </header>
 
@@ -105,7 +107,7 @@ export default function PracticePage() {
                 </div>
 
                 <p className="rounded-xl bg-white p-3 text-slate-900 shadow-sm">
-                  {mockQuestion}
+                  {questionPlaceholder}
                 </p>
 
                 <div className="flex flex-wrap items-center gap-2">
@@ -149,8 +151,8 @@ export default function PracticePage() {
                 )}
               </div>
               <div className="flex flex-wrap items-center gap-2">
-                <Button type="button" size="sm">
-                  Submit answer (mock)
+                <Button type="button" size="sm" disabled>
+                  Submit answer
                 </Button>
                 <Button type="button" size="sm" variant="outline">
                   Next question
@@ -166,13 +168,7 @@ export default function PracticePage() {
               Today&apos;s practice summary
             </h2>
             <p className="mt-1">
-              Questions attempted today:{" "}
-              <span className="font-semibold text-slate-900">12</span>. Points
-              earned: <span className="font-semibold text-slate-900">120</span>.
-            </p>
-            <p className="mt-1">
-              In the real app, this section will use the backend to calculate
-              your accuracy, streak, and recommended topics to revisit.
+              Select a topic to begin practicing and earning points.
             </p>
           </div>
           <div className="flex flex-col items-start gap-2">
@@ -183,8 +179,8 @@ export default function PracticePage() {
               A share card will highlight how many questions you attempted, your
               score, and the topics you focused on for the day.
             </p>
-            <Button type="button" size="sm" variant="outline">
-              Preview share card (mock)
+            <Button type="button" size="sm" variant="outline" disabled>
+              Share achievement
             </Button>
           </div>
         </section>

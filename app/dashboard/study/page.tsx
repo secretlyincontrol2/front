@@ -13,26 +13,8 @@ interface Message {
   text: string;
 }
 
-const mockMaterials = [
-  {
-    id: "intro",
-    title: "Introduction and course overview",
-    type: "Lecture notes",
-    duration: "15 min read",
-  },
-  {
-    id: "topic1",
-    title: "Topic 1 &ndash; Core concepts and definitions",
-    type: "Slides + text",
-    duration: "25 min read",
-  },
-  {
-    id: "topic2",
-    title: "Topic 2 &ndash; Visual diagrams and examples",
-    type: "Visual notes",
-    duration: "30 min read",
-  },
-];
+// Updated: Mock data removed. In production, this will be fetched from the backend.
+const materials: any[] = [];
 
 export default function StudyPage() {
   const [messages, setMessages] = React.useState<Message[]>([
@@ -97,24 +79,29 @@ export default function StudyPage() {
             </header>
 
             <ul className="flex flex-col gap-2">
-              {mockMaterials.map((item) => (
-                <li
-                  key={item.id}
-                  className="flex items-center justify-between gap-2 rounded-xl border border-border/70 bg-white px-3 py-2 text-xs hover:border-primary/60 hover:bg-primary-soft/30"
-                >
-                  <div>
-                    <p className="font-medium text-slate-900">
-                      {item.title}
-                    </p>
-                    <p className="text-[11px] text-muted-foreground">
-                      {item.type} &bull; {item.duration}
-                    </p>
-                  </div>
-                  <Button type="button" size="sm" variant="outline">
-                    Open
-                  </Button>
-                </li>
-              ))}
+              {materials.length > 0 ? (
+                materials.map((item) => (
+                  <li
+                    key={item.id}
+                    className="flex items-center justify-between gap-2 rounded-xl border border-border/70 bg-white px-3 py-2 text-xs hover:border-primary/60 hover:bg-primary-soft/30"
+                  >
+                    <div>
+                      <p className="font-medium text-slate-900">{item.title}</p>
+                      <p className="text-[11px] text-muted-foreground">
+                        {item.type} &bull; {item.duration}
+                      </p>
+                    </div>
+                    <Button type="button" size="sm" variant="outline">
+                      Open
+                    </Button>
+                  </li>
+                ))
+              ) : (
+                <div className="flex flex-col items-center justify-center py-8 text-center text-muted-foreground">
+                  <p>No materials uploaded for this course yet.</p>
+                  <p className="text-[10px]">Upload your course documents in the Admin panel (coming soon).</p>
+                </div>
+              )}
             </ul>
           </section>
 
@@ -180,12 +167,7 @@ export default function StudyPage() {
               Today&apos;s study summary
             </h2>
             <p className="mt-1">
-              Estimated time spent reading: <span className="font-semibold text-slate-900">45 minutes</span> across{" "}
-              <span className="font-semibold text-slate-900">2 materials</span>.
-            </p>
-            <p className="mt-1">
-              The real system will calculate this from your reading sessions and
-              display weekly and semester level trends.
+              Select a material to begin tracking your study progress.
             </p>
           </div>
           <div className="flex flex-col items-start gap-2">
@@ -196,8 +178,8 @@ export default function StudyPage() {
               A share button will let you post a simple card with your today&apos;s
               study time and completed topics to friends or study groups.
             </p>
-            <Button type="button" size="sm" variant="outline">
-              Preview share card (mock)
+            <Button type="button" size="sm" variant="outline" disabled>
+              Share achievement
             </Button>
           </div>
         </section>

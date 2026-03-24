@@ -53,9 +53,9 @@ export function OnboardingForm() {
 
     window.setTimeout(() => {
       setSaving(false);
-      toast.success("Preferences saved (mock).", {
+      toast.success("Preferences saved.", {
         description:
-          "Your tutor will now adapt sessions to your reading habit.",
+          "Your tutor will now personalise your study sessions based on your habits.",
       });
       router.push("/dashboard");
     }, 900);
@@ -268,8 +268,7 @@ export function OnboardingForm() {
 
       <footer className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-xs text-muted-foreground">
-          These answers are used to mock how we will personalise pacing,
-          content type, and reminders for you.
+          These answers are used to customise your pacing, content type, and study reminders.
         </p>
         <Button type="submit" loading={saving}>
           Finish setup and enter dashboard

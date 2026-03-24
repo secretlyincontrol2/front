@@ -11,36 +11,8 @@ interface Leader {
   hoursToday: string;
 }
 
-const mockLeaders: Leader[] = [
-  {
-    id: 1,
-    name: "Ola T.",
-    department: "Computer Science",
-    points: 420,
-    hoursToday: "2 hr 10 min",
-  },
-  {
-    id: 2,
-    name: "Chidera M.",
-    department: "Software Engineering",
-    points: 380,
-    hoursToday: "1 hr 55 min",
-  },
-  {
-    id: 3,
-    name: "You",
-    department: "Computer Science",
-    points: 320,
-    hoursToday: "1 hr 45 min",
-  },
-  {
-    id: 4,
-    name: "Favour A.",
-    department: "Nursing Science",
-    points: 290,
-    hoursToday: "1 hr 20 min",
-  },
-];
+// Updated: Mock data removed. In production, this will be fetched from the backend.
+const leaders: Leader[] = [];
 
 export default function LeaderboardPage() {
   return (
@@ -71,38 +43,45 @@ export default function LeaderboardPage() {
               </tr>
             </thead>
             <tbody>
-              {mockLeaders.map((leader, index) => {
-                const isYou = leader.name === "You";
-                return (
-                  <tr
-                    key={leader.id}
-                    className={`border-t border-border/60 ${
-                      isYou ? "bg-primary-soft/40" : "bg-white"
-                    }`}
-                  >
-                    <td className="px-4 py-2 text-[11px] font-medium text-muted-foreground sm:px-6">
-                      {index + 1}
-                    </td>
-                    <td className="px-4 py-2 text-xs font-semibold text-slate-900 sm:px-6">
-                      {leader.name}
-                    </td>
-                    <td className="hidden px-4 py-2 text-[11px] text-muted-foreground sm:table-cell sm:px-6">
-                      {leader.department}
-                    </td>
-                    <td className="px-4 py-2 text-xs font-semibold text-slate-900 sm:px-6">
-                      {leader.points}
-                    </td>
-                    <td className="px-4 py-2 text-[11px] text-muted-foreground sm:px-6">
-                      {leader.hoursToday}
-                    </td>
-                  </tr>
-                );
-              })}
+               {leaders.length > 0 ? (
+                leaders.map((leader, index) => {
+                  const isYou = leader.name === "You";
+                  return (
+                    <tr
+                      key={leader.id}
+                      className={`border-t border-border/60 ${
+                        isYou ? "bg-primary-soft/40" : "bg-white"
+                      }`}
+                    >
+                      <td className="px-4 py-2 text-[11px] font-medium text-muted-foreground sm:px-6">
+                        {index + 1}
+                      </td>
+                      <td className="px-4 py-2 text-xs font-semibold text-slate-900 sm:px-6">
+                        {leader.name}
+                      </td>
+                      <td className="hidden px-4 py-2 text-[11px] text-muted-foreground sm:table-cell sm:px-6">
+                        {leader.department}
+                      </td>
+                      <td className="px-4 py-2 text-xs font-semibold text-slate-900 sm:px-6">
+                        {leader.points}
+                      </td>
+                      <td className="px-4 py-2 text-[11px] text-muted-foreground sm:px-6">
+                        {leader.hoursToday}
+                      </td>
+                    </tr>
+                  );
+                })
+              ) : (
+                <tr>
+                  <td colSpan={5} className="px-6 py-10 text-center text-muted-foreground">
+                    No leaderboard data available yet.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
           <div className="border-t border-border/60 bg-muted/70 px-4 py-2 text-[11px] text-muted-foreground sm:px-6">
-            This board uses mocked data. The real system will rank students
-            daily, weekly, and by department using backend analytics.
+            The leaderboard ranks students daily and weekly based on study activity.
           </div>
         </section>
       </div>

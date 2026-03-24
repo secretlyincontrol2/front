@@ -22,9 +22,6 @@ export function StatCard({
     <article className="flex flex-col gap-2 rounded-xl border border-border bg-white/80 p-3 shadow-sm">
       <div className="flex items-center justify-between gap-2">
         <p className="text-xs font-medium text-muted-foreground">{label}</p>
-        <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${accentClass}`}>
-          Live mock
-        </span>
       </div>
       <p className="text-lg font-semibold text-slate-900">{value}</p>
       {helper && (

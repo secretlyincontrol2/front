@@ -49,8 +49,7 @@ export function CourseSelector() {
           Choose your department and course
         </h2>
         <p className="text-xs text-muted-foreground">
-          This selection is mocked for now. When the backend is ready, it will
-          load your department and registered courses automatically.
+          Select your department and registered course to begin your study or practice session.
         </p>
       </header>
 

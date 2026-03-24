@@ -11,26 +11,8 @@ interface Flashcard {
   back: string;
 }
 
-const mockFlashcards: Flashcard[] = [
-  {
-    id: "1",
-    source: "missed-question",
-    front: "Explain the main idea from a question you missed in Topic 1.",
-    back: "The key idea is that the system adapts to the student&apos;s pace by breaking content into short visual and text based segments.",
-  },
-  {
-    id: "2",
-    source: "key-note",
-    front: "Define &quot;visual function&quot; in the context of this tutoring system.",
-    back: "Visual functions are diagrams, annotated images, and structured layouts that help the student see how concepts connect.",
-  },
-  {
-    id: "3",
-    source: "missed-question",
-    front: "What metric is used to track a student&apos;s progress each day",
-    back: "Hours spent studying, points earned from practice questions, and goals completed are combined into a simple daily overview.",
-  },
-];
+// Updated: Mock data removed. In production, flashcards will be generated based on study history.
+const flashcards: Flashcard[] = [];
 
 export default function FlashcardsPage() {
   const [revealed, setRevealed] = React.useState<Record<string, boolean>>({});
@@ -55,50 +37,56 @@ export default function FlashcardsPage() {
 
         <section className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-white/80 p-4 text-xs text-muted-foreground shadow-sm sm:p-5">
           <p>
-            The cards below are mocked examples. When the backend is connected,
-            they will be generated automatically from your practice history and
-            highlighted sections in your notes.
+            Flashcards are generated automatically from your practice history and
+            highlighted sections in your notes once you start studying and practicing.
           </p>
-          <Button type="button" size="sm" variant="outline">
-            Shuffle deck (mock)
+          <Button type="button" size="sm" variant="outline" disabled>
+            Shuffle deck
           </Button>
         </section>
 
         <section className="grid gap-4 md:grid-cols-3">
-          {mockFlashcards.map((card) => {
-            const isRevealed = revealed[card.id];
-            const badgeLabel =
-              card.source === "missed-question"
-                ? "From a missed question"
-                : "From key study material";
+          {flashcards.length > 0 ? (
+            flashcards.map((card) => {
+              const isRevealed = revealed[card.id];
+              const badgeLabel =
+                card.source === "missed-question"
+                  ? "From a missed question"
+                  : "From key study material";
 
-            return (
-              <article
-                key={card.id}
-                className="flex flex-col justify-between gap-3 rounded-2xl border border-border bg-white/80 p-4 text-xs shadow-sm"
-              >
-                <header className="flex items-center justify-between gap-2">
-                  <span className="rounded-full bg-primary-soft/60 px-2 py-1 text-[10px] font-medium text-primary">
-                    {badgeLabel}
-                  </span>
-                  <span className="text-[10px] font-medium text-muted-foreground">
-                    Card {card.id}
-                  </span>
-                </header>
-                <p className="min-h-[72px] text-slate-900">
-                  {isRevealed ? card.back : card.front}
-                </p>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="outline"
-                  onClick={() => toggleCard(card.id)}
+              return (
+                <article
+                  key={card.id}
+                  className="flex flex-col justify-between gap-3 rounded-2xl border border-border bg-white/80 p-4 text-xs shadow-sm"
                 >
-                  {isRevealed ? "Hide answer" : "Reveal answer"}
-                </Button>
-              </article>
-            );
-          })}
+                  <header className="flex items-center justify-between gap-2">
+                    <span className="rounded-full bg-primary-soft/60 px-2 py-1 text-[10px] font-medium text-primary">
+                      {badgeLabel}
+                    </span>
+                    <span className="text-[10px] font-medium text-muted-foreground">
+                      Card {card.id}
+                    </span>
+                  </header>
+                  <p className="min-h-[72px] text-slate-900">
+                    {isRevealed ? card.back : card.front}
+                  </p>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => toggleCard(card.id)}
+                  >
+                    {isRevealed ? "Hide answer" : "Reveal answer"}
+                  </Button>
+                </article>
+              );
+            })
+          ) : (
+            <div className="col-span-full flex flex-col items-center justify-center py-10 text-center text-muted-foreground">
+              <p>No flashcards created yet.</p>
+              <p className="text-[10px]">Your flashcards will appear here as you practice and review materials.</p>
+            </div>
+          )}
         </section>
       </div>
     </AppShell>
