@@ -3,7 +3,7 @@ services:
     name: bupt-ai-frontend
     env: node
     plan: free
-    buildCommand: npm run build
+    buildCommand: npm install && npm run build
     startCommand: npm start
     envVars:
       - key: NEXT_PUBLIC_API_URL
@@ -12,3 +12,5 @@ services:
         value: production
       - key: HOSTNAME
         value: 0.0.0.0
+      - key: NODE_VERSION
+        value: 20
