@@ -21,6 +21,7 @@ export function StatCard({
   return (
     <article className="flex flex-col gap-2 rounded-xl border border-border bg-white/80 p-3 shadow-sm">
       <div className="flex items-center justify-between gap-2">
+        <div className={`h-1.5 w-1.5 rounded-full ${accentClass.split(" ")[0]}`}></div>
         <p className="text-xs font-medium text-muted-foreground">{label}</p>
       </div>
       <p className="text-lg font-semibold text-slate-900">{value}</p>

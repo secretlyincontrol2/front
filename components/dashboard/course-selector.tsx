@@ -1,12 +1,12 @@
-"use client";
-
+import * as React from "react";
 import { useCourseSelection } from "@/lib/hooks/use-course-selection";
-import { getCourses } from "@/lib/api";
+import { getCourses, type Department, type Course } from "@/lib/api";
 import { toast } from "sonner";
+import { Select } from "@/components/ui/select";
 
 export function CourseSelector() {
   const { selection, updateSelection } = useCourseSelection();
-  const [data, setData] = React.useState<{ departments: any[] }>({ departments: [] });
+  const [data, setData] = React.useState<{ departments: Department[] }>({ departments: [] });
   const [loading, setLoading] = React.useState(true);
 
   React.useEffect(() => {
@@ -43,7 +43,7 @@ export function CourseSelector() {
           label="Department"
           name="department"
           value={selection.department}
-          onChange={(event) => {
+          onChange={(event: React.ChangeEvent<HTMLSelectElement>) => {
             updateSelection({ department: event.target.value, course: "", courseLabel: "" });
           }}
           disabled={loading}
@@ -56,15 +56,15 @@ export function CourseSelector() {
           label="Course"
           name="course"
           value={selection.course}
-          onChange={(event) => {
+          onChange={(event: React.ChangeEvent<HTMLSelectElement>) => {
             const courseVal = event.target.value;
-            const label = availableCourses.find((c: any) => c.value === courseVal)?.label || "";
+            const label = availableCourses.find((c: Course) => c.value === courseVal)?.label || "";
             updateSelection({ course: courseVal, courseLabel: label });
           }}
           disabled={loading || !selection.department}
           options={[
             { label: selection.department ? "Select a course" : "Select department first", value: "" },
-            ...availableCourses.map((c: any) => ({ label: c.label, value: c.value }))
+            ...availableCourses.map((c: Course) => ({ label: c.label, value: c.value }))
           ]}
         />
       </div>

@@ -94,19 +94,30 @@ export interface LeaderboardEntry {
     studyHoursTotal: number;
 }
 
+export interface Course {
+    label: string;
+    value: string;
+}
+
+export interface Department {
+    label: string;
+    value: string;
+    courses: Course[];
+}
+
 // ═══════════════════════════════════════════════════════════════
 //  API FUNCTIONS
 // ═══════════════════════════════════════════════════════════════
 
 /** AUTH */
-export async function registerUser(payload: any): Promise<AuthResponse> {
+export async function registerUser(payload: Record<string, unknown>): Promise<AuthResponse> {
     return apiFetch<AuthResponse>("/auth/register", {
         method: "POST",
         body: JSON.stringify(payload),
     });
 }
 
-export async function loginUser(payload: any): Promise<AuthResponse> {
+export async function loginUser(payload: Record<string, unknown>): Promise<AuthResponse> {
     return apiFetch<AuthResponse>("/auth/login", {
         method: "POST",
         body: JSON.stringify(payload),
@@ -187,19 +198,19 @@ export async function updateProgress(
     topic: string,
     correct: boolean,
     studyMinutes: number = 0
-): Promise<any> {
-    return apiFetch<any>(`/ai/progress/${studentId}`, {
+): Promise<unknown> {
+    return apiFetch<unknown>(`/ai/progress/${studentId}`, {
         method: "POST",
         body: JSON.stringify({ course, topic, correct, studyMinutes }),
     });
 }
 
-export async function updateOnboarding(payload: any): Promise<any> {
-    return apiFetch<any>("/auth/onboarding", {
+export async function updateOnboarding(payload: Record<string, unknown>): Promise<unknown> {
+    return apiFetch<unknown>("/auth/onboarding", {
         method: "POST",
         body: JSON.stringify(payload),
     });
 }
-export async function getCourses(): Promise<{ departments: any[] }> {
-    return apiFetch<{ departments: any[] }>("/ai/courses");
+export async function getCourses(): Promise<{ departments: Department[] }> {
+    return apiFetch<{ departments: Department[] }>("/ai/courses");
 }
