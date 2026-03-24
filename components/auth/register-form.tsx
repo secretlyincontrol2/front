@@ -85,6 +85,7 @@ export function RegisterForm() {
         });
         router.push("/login");
       })
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .catch((error: any) => {
         console.error("Registration error:", error);
         toast.error("Registration failed", {

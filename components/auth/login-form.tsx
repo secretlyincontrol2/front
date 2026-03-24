@@ -27,6 +27,7 @@ export function LoginForm() {
       password: String(formData.get("password") || ""),
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const nextErrors: any = {};
     if (!data.matricNumber) nextErrors.matricNumber = "Matric number is required.";
     if (!data.password) nextErrors.password = "Password is required.";
@@ -43,6 +44,7 @@ export function LoginForm() {
         });
         router.push("/dashboard");
       })
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .catch((error: any) => {
         console.error("Login error:", error);
         toast.error("Login failed", {

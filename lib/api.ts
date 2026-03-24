@@ -37,6 +37,7 @@ export const apiService = {
   /**
    * Login student
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async login(data: any): Promise<any> {
     const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
       method: "POST",
@@ -59,6 +60,7 @@ export const apiService = {
   /**
    * Register student
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async register(data: any): Promise<any> {
     const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
       method: "POST",

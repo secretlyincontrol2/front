@@ -74,7 +74,7 @@ export default function StudyPage() {
           </h1>
           <p className="max-w-2xl text-sm text-muted-foreground">
             Choose your course, open the uploaded materials, and chat with the
-            AI tutor. The bot uses your lecturer's notes to give accurate answers.
+            AI tutor. The bot uses your lecturer&apos;s notes to give accurate answers.
           </p>
         </section>
 

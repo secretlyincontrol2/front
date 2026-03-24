@@ -41,10 +41,6 @@ export function CourseSelector() {
   const [department, setDepartment] = React.useState("");
   const [course, setCourse] = React.useState("");
 
-  const courseOptions =
-    coursesByDepartment[department] || [
-      { label: "Select a course", value: "" },
-    ];
 
   return (
     <section className="flex flex-col gap-3 rounded-2xl border border-border bg-white/80 p-4 shadow-sm sm:p-5">
