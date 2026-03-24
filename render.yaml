@@ -3,10 +3,10 @@ services:
     name: bupt-ai-frontend
     env: node
     plan: free
-    buildCommand: npm install
-    startCommand: npm run dev -- -p 3005
+    buildCommand: npm run build
+    startCommand: npm start
     envVars:
       - key: NEXT_PUBLIC_API_URL
         value: https://cyntigdggdg.onrender.com
       - key: NODE_ENV
-        value: development
+        value: production
