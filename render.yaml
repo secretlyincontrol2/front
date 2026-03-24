@@ -1,6 +1,7 @@
 services:
   - type: web
     name: bupt-ai-frontend
+    rootDir: BUPT_frontend
     env: node
     plan: free
     buildCommand: npm install && npm run build
