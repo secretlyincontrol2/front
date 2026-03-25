@@ -109,9 +109,25 @@ export default function PracticePage() {
   };
 
   const shareToPlatform = (platform: string) => {
-    toast.success(`Sharing to ${platform}...`, {
-      description: "Opening share dialog."
-    });
+    const shareText = `I just completed a practice session on ${selection.course || "BUPT AI Tutor"}! I scored ${score.correct}/${questions.length}! 🎯🦉`;
+    const shareUrl = "https://bupt-ai-tutor.vercel.app";
+    
+    switch (platform) {
+      case "WhatsApp":
+        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + " " + shareUrl)}`, "_blank");
+        break;
+      case "X":
+        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`, "_blank");
+        break;
+      case "Instagram":
+        // Instagram does not allow direct sharing via URL.
+        // The common approach is to copy text to clipboard and instruct the user.
+        navigator.clipboard.writeText(shareText + " " + shareUrl);
+        toast.success("Ready to share!", { description: "Progress copied! Open Instagram to post." });
+        break;
+      default:
+        toast.info(`Sharing to ${platform}...`);
+    }
   };
 
   return (
@@ -192,6 +208,26 @@ export default function PracticePage() {
                      <div className="prose prose-slate max-w-none text-lg font-medium text-slate-800">
                         <ReactMarkdown>{currentQuestion.question}</ReactMarkdown>
                      </div>
+
+                     {currentQuestion.imageUrl && (
+                        <div className="relative mt-4 h-48 w-full overflow-hidden rounded-2xl border border-border bg-slate-100">
+                           <Image 
+                              src={currentQuestion.imageUrl} 
+                              alt="Question Image" 
+                              fill 
+                              className="object-contain"
+                           />
+                        </div>
+                     )}
+
+                     {currentQuestion.diagram && (
+                        <div className="mt-4 rounded-2xl border border-dashed border-primary/20 bg-primary-soft/10 p-4 text-center">
+                           <p className="text-[10px] font-bold uppercase tracking-wider text-primary mb-2">Diagram Illustration</p>
+                           <div className="prose prose-sm mx-auto text-slate-600 italic">
+                              <ReactMarkdown>{currentQuestion.diagram}</ReactMarkdown>
+                           </div>
+                        </div>
+                     )}
 
                      <div className="mt-8 space-y-3">
                         {currentQuestion.type === "multiple_choice" ? (

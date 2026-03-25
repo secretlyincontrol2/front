@@ -67,23 +67,67 @@ export default function StudyPage() {
   };
 
   const toggleRecording = () => {
+    if (!("webkitSpeechRecognition" in window) && !("SpeechRecognition" in window)) {
+      toast.error("Speech Recognition Not Supported", {
+        description: "Your browser does not support the Web Speech API."
+      });
+      return;
+    }
+
     if (isRecording) {
       setIsRecording(false);
-      toast.success("Audio captured!", { description: "Converting your speech to text..." });
-      // Simulate speech to text - in real app, this would use a speech API
-      setTimeout(() => {
-        setInputValue("Can you explain the main concepts in these notes?");
-      }, 1500);
+      // Stop recognition (handled by event listeners)
     } else {
-      setIsRecording(true);
-      toast.info("Recording...", { description: "Speak now to ask your question." });
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      const recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = "en-US";
+
+      recognition.onstart = () => {
+        setIsRecording(true);
+        toast.info("Recording...", { description: "Speak now to ask your question." });
+      };
+
+      recognition.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        setInputValue(transcript);
+        toast.success("Speech captured!", { description: `"${transcript}"` });
+      };
+
+      recognition.onerror = (event: any) => {
+        console.error("Speech recognition error:", event.error);
+        setIsRecording(false);
+        toast.error("Speech recognition failed", { description: event.error });
+      };
+
+      recognition.onend = () => {
+        setIsRecording(false);
+      };
+
+      recognition.start();
     }
   };
 
   const shareToPlatform = (platform: string) => {
-    toast.success(`Sharing to ${platform}...`, {
-      description: "Opening share dialog."
-    });
+    const shareText = `I'm studying ${selection.course || "BUPT courses"} with BUPT AI Tutor! Check it out!`;
+    const shareUrl = "https://bupt-ai-tutor.vercel.app";
+    
+    switch (platform) {
+      case "WhatsApp":
+        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + " " + shareUrl)}`, "_blank");
+        break;
+      case "X":
+        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`, "_blank");
+        break;
+      case "Instagram":
+        // Instagram doesn't support direct text sharing via URL, so copy to clipboard and notify
+        navigator.clipboard.writeText(shareText + " " + shareUrl);
+        toast.success("Ready to share!", { description: "Link copied to clipboard. Open Instagram to post!" });
+        break;
+      default:
+        toast.info(`Sharing to ${platform}...`);
+    }
   };
 
   return (

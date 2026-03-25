@@ -76,6 +76,8 @@ export interface PracticeQuestion {
     correctAnswer?: string;
     expectedAnswer?: string;
     explanation: string;
+    imageUrl?: string;
+    diagram?: string;
 }
 
 export interface UserProgress {
@@ -225,11 +227,11 @@ export interface Flashcard {
 }
 
 export async function getFlashcards(): Promise<Flashcard[]> {
-    return apiFetch<Flashcard[]>("/flashcards");
+    return apiFetch<Flashcard[]>("/ai/flashcards");
 }
 
 export async function generateFlashcards(course: string, topic: string): Promise<{ cards: Flashcard[] }> {
-    return apiFetch<{ cards: Flashcard[] }>("/flashcards/generate", {
+    return apiFetch<{ cards: Flashcard[] }>("/ai/flashcards/generate", {
         method: "POST",
         body: JSON.stringify({ course, topic }),
     });
