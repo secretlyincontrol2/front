@@ -12,6 +12,39 @@ import { sendChat, uploadNoteForTutoring } from "@/lib/api";
 import { useCourseSelection } from "@/lib/hooks/use-course-selection";
 import ReactMarkdown from "react-markdown";
 
+/**
+ * Type definitions for Web Speech API to satisfy linting
+ */
+interface WindowWithSpeech extends Window {
+  SpeechRecognition?: new () => ISpeechRecognition;
+  webkitSpeechRecognition?: new () => ISpeechRecognition;
+}
+
+interface ISpeechRecognition {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  onstart: () => void;
+  onresult: (event: SpeechRecognitionEvent) => void;
+  onerror: (event: SpeechRecognitionError) => void;
+  onend: () => void;
+  start: () => void;
+}
+
+interface SpeechRecognitionEvent {
+  results: {
+    [index: number]: {
+      [index: number]: {
+        transcript: string;
+      };
+    };
+  };
+}
+
+interface SpeechRecognitionError {
+  error: string;
+}
+
 export default function StudyPage() {
   const { selection } = useCourseSelection();
   const [messages, setMessages] = React.useState<{ from: string; text: string }[]>([]);
@@ -78,7 +111,10 @@ export default function StudyPage() {
       setIsRecording(false);
       // Stop recognition (handled by event listeners)
     } else {
-      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      const win = window as unknown as WindowWithSpeech;
+      const SpeechRecognition = win.SpeechRecognition || win.webkitSpeechRecognition;
+      if (!SpeechRecognition) return;
+
       const recognition = new SpeechRecognition();
       recognition.continuous = false;
       recognition.interimResults = false;
@@ -89,13 +125,13 @@ export default function StudyPage() {
         toast.info("Recording...", { description: "Speak now to ask your question." });
       };
 
-      recognition.onresult = (event: any) => {
+      recognition.onresult = (event: SpeechRecognitionEvent) => {
         const transcript = event.results[0][0].transcript;
         setInputValue(transcript);
         toast.success("Speech captured!", { description: `"${transcript}"` });
       };
 
-      recognition.onerror = (event: any) => {
+      recognition.onerror = (event: SpeechRecognitionError) => {
         console.error("Speech recognition error:", event.error);
         setIsRecording(false);
         toast.error("Speech recognition failed", { description: event.error });
@@ -110,7 +146,7 @@ export default function StudyPage() {
   };
 
   const shareToPlatform = (platform: string) => {
-    const shareText = `I'm studying ${selection.course || "BUPT courses"} with BUPT AI Tutor! Check it out!`;
+    const shareText = `I&apos;m studying ${selection.course || "BUPT courses"} with BUPT AI Tutor! Check it out!`;
     const shareUrl = "https://bupt-ai-tutor.vercel.app";
     
     switch (platform) {

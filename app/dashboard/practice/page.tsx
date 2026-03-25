@@ -172,7 +172,7 @@ export default function PracticePage() {
                 <div className="space-y-2">
                 <h2 className="text-xl font-bold text-slate-900">Ready to test your knowledge?</h2>
                 <p className="max-w-md mx-auto text-sm text-muted-foreground">
-                    I'll generate a set of custom questions based on your current course selection to help you prepare for exams.
+                    I&apos;ll generate a set of custom questions based on your current course selection to help you prepare for exams.
                 </p>
                 </div>
                 <Button
@@ -274,7 +274,7 @@ export default function PracticePage() {
                                  className="min-h-[120px] w-full rounded-2xl border border-border bg-slate-50/50 p-4 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-60"
                               />
                               <p className="text-[10px] text-muted-foreground italic">
-                                 Note: Your answer will be compared to the tutor's expected explanation.
+                                 Note: Your answer will be compared to the tutor&apos;s expected explanation.
                               </p>
                            </div>
                         )}
@@ -316,7 +316,7 @@ export default function PracticePage() {
                            <div className="space-y-4">
                               <div>
                                  <h4 className={`text-sm font-bold uppercase tracking-wider ${isCorrect || currentQuestion.type === 'short_answer' ? 'text-green-700' : 'text-red-700'}`}>
-                                    {currentQuestion.type === 'multiple_choice' ? (isCorrect ? 'Correct!' : 'Not quite right') : 'Tutor\'s Explanation'}
+                                    {currentQuestion.type === 'multiple_choice' ? (isCorrect ? 'Correct!' : 'Not quite right') : 'Tutor&apos;s Explanation'}
                                  </h4>
                                  <div className="prose prose-slate mt-2 max-w-none text-sm text-slate-700 leading-relaxed font-medium">
                                     <ReactMarkdown>{currentQuestion.explanation}</ReactMarkdown>
