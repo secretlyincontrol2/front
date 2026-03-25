@@ -86,11 +86,21 @@ export default function PracticePage() {
           }
         }
     } else {
-        // Short answer just counts as participation for now
+        // Short answer counts as participation
         setScore(prev => ({
             correct: prev.correct + 1,
             total: prev.total + 1,
         }));
+
+        const user = getUser();
+        if (user?._id) {
+           try {
+             // Mark as correct for participation points
+             await updateProgress(user._id, selection.course, "general", true);
+           } catch {
+             // Progress update failed silently
+           }
+        }
     }
   };
 
