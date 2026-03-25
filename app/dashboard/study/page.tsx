@@ -9,8 +9,8 @@ import { Paperclip, Mic, Send } from "lucide-react";
 import { WhatsAppIcon, InstagramIcon, XIcon } from "@/components/ui/social-icons";
 import { toast } from "sonner";
 import { sendChat, uploadNoteForTutoring } from "@/lib/api";
-
 import { useCourseSelection } from "@/lib/hooks/use-course-selection";
+import ReactMarkdown from "react-markdown";
 
 export default function StudyPage() {
   const { selection } = useCourseSelection();
@@ -162,7 +162,7 @@ export default function StudyPage() {
               </span>
             </header>
 
-            <div className="flex min-h-[300px] flex-col gap-2 rounded-xl border border-border/70 bg-muted/60 p-3 text-xs overflow-y-auto max-h-[450px]">
+            <div className="flex h-[400px] lg:h-[500px] flex-col gap-2 rounded-xl border border-border/70 bg-muted/60 p-3 text-xs overflow-y-auto">
               {messages.length === 0 && (
                 <div className="flex flex-1 items-center justify-center text-muted-foreground">
                   <p>Ask the tutor a question to get started.</p>
@@ -173,10 +173,14 @@ export default function StudyPage() {
                   key={index}
                   className={`max-w-[90%] rounded-2xl px-3 py-2 ${message.from === "student"
                     ? "self-end bg-primary text-white"
-                    : "self-start bg-white text-slate-900 shadow-sm"
+                    : "self-start bg-white text-slate-900 shadow-sm prose prose-sm max-w-none"
                     }`}
                 >
-                  {message.text}
+                  {message.from === "tutor" ? (
+                    <ReactMarkdown>{message.text}</ReactMarkdown>
+                  ) : (
+                    message.text
+                  )}
                 </div>
               ))}
             </div>

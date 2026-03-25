@@ -214,3 +214,23 @@ export async function updateOnboarding(payload: Record<string, unknown>): Promis
 export async function getCourses(): Promise<{ departments: Department[] }> {
     return apiFetch<{ departments: Department[] }>("/ai/courses");
 }
+
+/** FLASHCARDS */
+export interface Flashcard {
+    _id: string;
+    question: string;
+    answer: string;
+    topic: string;
+    difficulty: string;
+}
+
+export async function getFlashcards(): Promise<Flashcard[]> {
+    return apiFetch<Flashcard[]>("/flashcards");
+}
+
+export async function generateFlashcards(course: string, topic: string): Promise<{ cards: Flashcard[] }> {
+    return apiFetch<{ cards: Flashcard[] }>("/flashcards/generate", {
+        method: "POST",
+        body: JSON.stringify({ course, topic }),
+    });
+}

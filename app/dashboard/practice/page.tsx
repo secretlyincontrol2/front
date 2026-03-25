@@ -7,11 +7,10 @@ import { CourseSelector } from "@/components/dashboard/course-selector";
 import { Button } from "@/components/ui/button";
 import { WhatsAppIcon, InstagramIcon, XIcon } from "@/components/ui/social-icons";
 import { toast } from "sonner";
-import { generatePractice, updateProgress } from "@/lib/api";
-import type { PracticeQuestion } from "@/lib/api";
+import { generatePractice, updateProgress, type PracticeQuestion } from "@/lib/api";
 import { getUser } from "@/lib/auth";
-
 import { useCourseSelection } from "@/lib/hooks/use-course-selection";
+import ReactMarkdown from "react-markdown";
 
 export default function PracticePage() {
   const { selection } = useCourseSelection();
@@ -193,25 +192,25 @@ export default function PracticePage() {
               </header>
 
               <div className="mt-2 space-y-4">
-                <div className="rounded-xl bg-primary-soft/30 p-4 text-sm text-slate-900 leading-relaxed shadow-sm">
-                  {currentQuestion?.question}
+                <div className="rounded-xl bg-primary-soft/30 p-4 text-sm text-slate-900 leading-relaxed shadow-sm prose prose-sm max-w-none">
+                  <ReactMarkdown>{currentQuestion?.question}</ReactMarkdown>
                 </div>
 
                 {currentQuestion?.options && (
                   <div className="grid gap-2 sm:grid-cols-2">
-                    {currentQuestion.options.map((option) => (
-                      <button
-                        key={option}
-                        disabled={showResult}
-                        onClick={() => setSelectedAnswer(option)}
-                        className={`rounded-xl border p-3 text-left text-xs transition-all ${selectedAnswer === option
-                          ? "border-primary bg-primary text-white"
-                          : "border-border bg-white hover:border-primary/50 hover:bg-primary-soft/20"
-                          } ${showResult && option === (currentQuestion.correctAnswer || currentQuestion.expectedAnswer)
-                            ? "border-green-500 bg-green-50 text-green-700 ring-1 ring-green-500"
-                            : ""
-                          }`}
-                      >
+                      {currentQuestion.options.map((option: string) => (
+                        <button
+                          key={option}
+                          disabled={showResult}
+                          onClick={() => setSelectedAnswer(option)}
+                          className={`rounded-xl border p-3 text-left text-xs transition-all ${selectedAnswer === option
+                            ? "border-primary bg-primary text-white"
+                            : "border-border bg-white hover:border-primary/50 hover:bg-primary-soft/20"
+                            } ${showResult && option === (currentQuestion.correctAnswer || currentQuestion.expectedAnswer)
+                              ? "border-green-500 bg-green-50 text-green-700 ring-1 ring-green-500"
+                              : ""
+                            }`}
+                        >
                         {option}
                       </button>
                     ))}
