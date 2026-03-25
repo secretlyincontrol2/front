@@ -186,7 +186,7 @@ export async function uploadNoteForTutoring(
 
 /** LEADERBOARD */
 export async function getLeaderboard(limit: number = 10): Promise<LeaderboardEntry[]> {
-    return apiFetch<LeaderboardEntry[]>(`/users/leaderboard?limit=${limit}`);
+    return apiFetch<LeaderboardEntry[]>(`/leaderboard?limit=${limit}`);
 }
 
 /** PROGRESS */
