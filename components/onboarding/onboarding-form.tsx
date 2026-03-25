@@ -61,6 +61,7 @@ export function OnboardingForm() {
         breakDuration: state.breakDuration || undefined,
         dailyHours: state.dailyHours || undefined,
         readerType: state.readerType || undefined,
+        school: "Babcock University", // Ensure this is set to mark onboarding as complete
       });
 
       toast.success("Preferences saved!", {

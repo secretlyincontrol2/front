@@ -156,6 +156,17 @@ export async function generatePractice(
     });
 }
 
+export async function verifyShortAnswer(
+    question: string,
+    studentAnswer: string,
+    expectedAnswer: string
+): Promise<{ isCorrect: boolean; score: number; feedback: string }> {
+    return apiFetch<{ isCorrect: boolean; score: number; feedback: string }>("/ai/practice/verify", {
+        method: "POST",
+        body: JSON.stringify({ question, studentAnswer, expectedAnswer }),
+    });
+}
+
 export async function uploadNoteForTutoring(
     file: File,
     question: string = "Summarize this document and explain key concepts.",
@@ -204,6 +215,19 @@ export async function updateProgress(
     return apiFetch<unknown>(`/ai/progress/${studentId}`, {
         method: "POST",
         body: JSON.stringify({ course, topic, correct, studyMinutes }),
+    });
+}
+
+export async function trackPracticeResult(payload: {
+    courseId: string;
+    courseName: string;
+    questionsAttempted: number;
+    correctAnswers: number;
+    sessionDetails?: any[];
+}): Promise<unknown> {
+    return apiFetch<unknown>("/performance/practice-result", {
+        method: "POST",
+        body: JSON.stringify(payload),
     });
 }
 

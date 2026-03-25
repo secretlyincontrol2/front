@@ -7,7 +7,7 @@ import { CourseSelector } from "@/components/dashboard/course-selector";
 import { Button } from "@/components/ui/button";
 import { WhatsAppIcon, InstagramIcon, XIcon } from "@/components/ui/social-icons";
 import { toast } from "sonner";
-import { generatePractice, updateProgress, type PracticeQuestion } from "@/lib/api";
+import { generatePractice, updateProgress, verifyShortAnswer, trackPracticeResult, type PracticeQuestion } from "@/lib/api";
 import { getUser } from "@/lib/auth";
 import { useCourseSelection } from "@/lib/hooks/use-course-selection";
 import ReactMarkdown from "react-markdown";
@@ -25,14 +25,9 @@ export default function PracticePage() {
   const [practiceStarted, setPracticeStarted] = React.useState(false);
 
   const currentQuestion = questions[currentIndex];
-  const isCorrect = React.useMemo(() => {
-    if (!currentQuestion) return false;
-    if (currentQuestion.type === "multiple_choice") {
-       return selectedAnswer === currentQuestion.correctAnswer;
-    }
-    // For short answer, we just reveal the answer, though we could do fuzzy matching
-    return true; 
-  }, [currentQuestion, selectedAnswer]);
+  const [isCorrect, setIsCorrect] = React.useState(false);
+  const [isVerifying, setIsVerifying] = React.useState(false);
+  const [aiFeedback, setAiFeedback] = React.useState("");
 
   const startPractice = async () => {
     if (!selection.department || !selection.course) {
@@ -64,43 +59,65 @@ export default function PracticePage() {
     }
   };
 
+
   const submitAnswer = async () => {
     if (currentQuestion.type === "multiple_choice" && !selectedAnswer) return;
     if (currentQuestion.type === "short_answer" && !shortAnswerValue) return;
 
+    let correct = false;
+    let feedbackText = "";
+
+    if (currentQuestion.type === "multiple_choice") {
+        correct = selectedAnswer === currentQuestion.correctAnswer;
+    } else {
+        // Short Answer - AI Verification
+        setIsVerifying(true);
+        try {
+            const result = await verifyShortAnswer(
+                currentQuestion.question,
+                shortAnswerValue,
+                currentQuestion.expectedAnswer || ""
+            );
+            correct = result.isCorrect;
+            feedbackText = result.feedback;
+        } catch (err) {
+            console.error("AI verify failed:", err);
+            correct = true; // Fallback
+        } finally {
+            setIsVerifying(false);
+        }
+    }
+
+    setIsCorrect(correct);
+    setAiFeedback(feedbackText);
     setShowResult(true);
     
-    if (currentQuestion.type === "multiple_choice") {
-        const correct = selectedAnswer === currentQuestion.correctAnswer;
-        setScore(prev => ({
-          correct: prev.correct + (correct ? 1 : 0),
-          total: prev.total + 1,
-        }));
+    setScore(prev => ({
+      correct: prev.correct + (correct ? 1 : 0),
+      total: prev.total + 1,
+    }));
 
-        const user = getUser();
-        if (user?._id) {
-          try {
-            await updateProgress(user._id, selection.course, "general", correct);
-          } catch {
-            // Progress update failed silently
-          }
-        }
-    } else {
-        // Short answer counts as participation
-        setScore(prev => ({
-            correct: prev.correct + 1,
-            total: prev.total + 1,
-        }));
-
-        const user = getUser();
-        if (user?._id) {
-           try {
-             // Mark as correct for participation points
-             await updateProgress(user._id, selection.course, "general", true);
-           } catch {
-             // Progress update failed silently
-           }
-        }
+    const user = getUser();
+    if (user?._id) {
+       try {
+         // 1. Sync to AI Server (Mastery)
+         await updateProgress(user._id, selection.course, currentQuestion.topic || "Practice", correct);
+         
+         // 2. Sync to Node.js (Leaderboard)
+         await trackPracticeResult({
+             courseId: selection.course,
+             courseName: selection.course,
+             questionsAttempted: 1,
+             correctAnswers: correct ? 1 : 0,
+             sessionDetails: [{
+                 topic: currentQuestion.topic || "General",
+                 isCorrect: correct,
+                 question: currentQuestion.question
+             }]
+         });
+       } catch (err) {
+         console.error("Progress sync failed:", err);
+       }
     }
   };
 
@@ -110,6 +127,7 @@ export default function PracticePage() {
       setSelectedAnswer(null);
       setShortAnswerValue("");
       setShowResult(false);
+      setAiFeedback("");
     } else {
       setPracticeStarted(false);
       toast.success("Practice session complete!", {
@@ -297,11 +315,11 @@ export default function PracticePage() {
                      </p>
                      {!showResult ? (
                         <Button
-                           disabled={currentQuestion.type === 'multiple_choice' ? !selectedAnswer : !shortAnswerValue}
+                           disabled={isVerifying || (currentQuestion.type === 'multiple_choice' ? !selectedAnswer : !shortAnswerValue)}
                            onClick={submitAnswer}
                            className="h-10 rounded-xl px-6 font-bold"
                         >
-                           Check Answer
+                           {isVerifying ? "Verifying..." : "Check Answer"}
                         </Button>
                       ) : (
                         <Button
@@ -329,7 +347,7 @@ export default function PracticePage() {
                                     {currentQuestion.type === 'multiple_choice' ? (isCorrect ? 'Correct!' : 'Not quite right') : 'Tutor&apos;s Explanation'}
                                  </h4>
                                  <div className="prose prose-slate mt-2 max-w-none text-sm text-slate-700 leading-relaxed font-medium">
-                                    <ReactMarkdown>{currentQuestion.explanation}</ReactMarkdown>
+                                    <ReactMarkdown>{aiFeedback || currentQuestion.explanation}</ReactMarkdown>
                                  </div>
                               </div>
                               
