@@ -198,12 +198,27 @@ export async function uploadNoteForTutoring(
 
 /** LEADERBOARD */
 export async function getLeaderboard(limit: number = 10): Promise<LeaderboardEntry[]> {
-    return apiFetch<LeaderboardEntry[]>(`/leaderboard?limit=${limit}`);
+    const data = await apiFetch<{ success: boolean; leaderboard: LeaderboardEntry[] }>(`/leaderboard?limit=${limit}`);
+    return data.leaderboard || [];
 }
 
 /** PROGRESS */
 export async function getProgress(studentId: string): Promise<UserProgress> {
-    return apiFetch<UserProgress>(`/ai/progress/${studentId}`);
+    const data = await apiFetch<{ success: boolean; performance: any }>("/performance/me");
+    if (data.success && data.performance) {
+        return {
+            totalStudyMinutes: data.performance.totalStudyMinutes || 0,
+            totalPracticePoints: data.performance.leaderboardPoints || 0,
+            streak: data.performance.currentStreak || 0,
+            completedTopics: data.performance.strongTopics || [],
+        };
+    }
+    return {
+        totalStudyMinutes: 0,
+        totalPracticePoints: 0,
+        streak: 0,
+        completedTopics: [],
+    };
 }
 
 export async function updateProgress(

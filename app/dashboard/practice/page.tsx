@@ -312,7 +312,9 @@ export default function PracticePage() {
 
                   <footer className="flex items-center justify-between border-t border-border/50 bg-slate-50/50 px-6 py-4">
                      <p className="text-[11px] font-medium text-slate-400 italic">
-                        {!showResult ? "Select an option to confirm" : "Review the explanation below"}
+                        {!showResult 
+                           ? (currentQuestion.type === 'multiple_choice' ? "Select an option to confirm" : "Provide a detailed answer to check") 
+                           : "Review the explanation below"}
                      </p>
                      {!showResult ? (
                         <Button
@@ -334,18 +336,17 @@ export default function PracticePage() {
                   </footer>
                </article>
 
-               {/* Result / Explanation Card */}
                {showResult && (
                   <section className="animate-in fade-in slide-in-from-top-4 duration-500">
-                     <div className={`rounded-3xl border p-6 md:p-8 shadow-sm ${isCorrect || currentQuestion.type === 'short_answer' ? 'border-green-100 bg-green-50/30' : 'border-red-100 bg-red-50/30'}`}>
+                     <div className={`rounded-3xl border p-6 md:p-8 shadow-sm ${isCorrect ? 'border-green-100 bg-green-50/30' : 'border-red-100 bg-red-50/30'}`}>
                         <div className="flex items-start gap-4">
-                           <div className={`mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${isCorrect || currentQuestion.type === 'short_answer' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
-                              {isCorrect || currentQuestion.type === 'short_answer' ? <Lightbulb className="h-6 w-6" /> : <Info className="h-6 w-6" />}
+                           <div className={`mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${isCorrect ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                              {isCorrect ? <Lightbulb className="h-6 w-6" /> : <Info className="h-6 w-6" />}
                            </div>
                            <div className="space-y-4">
                               <div>
-                                 <h4 className={`text-sm font-bold uppercase tracking-wider ${isCorrect || currentQuestion.type === 'short_answer' ? 'text-green-700' : 'text-red-700'}`}>
-                                    {currentQuestion.type === 'multiple_choice' ? (isCorrect ? 'Correct!' : 'Not quite right') : 'Tutor&apos;s Explanation'}
+                                 <h4 className={`text-sm font-bold uppercase tracking-wider ${isCorrect ? 'text-green-700' : 'text-red-700'}`}>
+                                    {isCorrect ? 'Correct!' : (currentQuestion.type === 'multiple_choice' ? 'Not quite right' : 'Requires Improvement')}
                                  </h4>
                                  <div className="prose prose-slate mt-2 max-w-none text-sm text-slate-700 leading-relaxed font-medium">
                                     <ReactMarkdown>{aiFeedback || currentQuestion.explanation}</ReactMarkdown>

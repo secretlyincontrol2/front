@@ -207,7 +207,7 @@ export default function StudyPage() {
                 ref={fileInputRef}
                 onChange={handleFileUpload}
                 className="hidden"
-                accept=".doc,.docx,.ppt,.pptx,.pdf"
+                accept=".doc,.docx,.ppt,.pptx,.pdf,.txt"
               />
             </header>
 
