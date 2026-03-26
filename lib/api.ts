@@ -224,7 +224,7 @@ export async function trackPracticeResult(payload: {
     courseName: string;
     questionsAttempted: number;
     correctAnswers: number;
-    sessionDetails?: any[];
+    sessionDetails?: Record<string, unknown>[];
 }): Promise<unknown> {
     return apiFetch<unknown>("/performance/practice-result", {
         method: "POST",

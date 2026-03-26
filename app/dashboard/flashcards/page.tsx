@@ -5,7 +5,7 @@ import { AppShell } from "@/components/layout/app-shell";
 import { Button } from "@/components/ui/button";
 import { getFlashcards, type Flashcard } from "@/lib/api";
 import ReactMarkdown from "react-markdown";
-import { RefreshCw, Play, Filter } from "lucide-react";
+import { RefreshCw, Play } from "lucide-react";
 import { useCourseSelection } from "@/lib/hooks/use-course-selection";
 
 export default function FlashcardsPage() {
