@@ -45,6 +45,13 @@ export function removeUser() {
   localStorage.removeItem(USER_KEY);
 }
 
+export function updateLocalUser(updates: Partial<CachedUser>) {
+  const user = getUser();
+  if (user) {
+    saveUser({ ...user, ...updates });
+  }
+}
+
 // ── Logout (clears everything) ─────────────────────────────────
 export function logout() {
   removeToken();

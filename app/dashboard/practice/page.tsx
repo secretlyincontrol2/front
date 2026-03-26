@@ -82,7 +82,8 @@ export default function PracticePage() {
             feedbackText = result.feedback;
         } catch (err) {
             console.error("AI verify failed:", err);
-            correct = true; // Fallback
+            correct = false; // Be strict if AI fails
+            feedbackText = "Verification failed. Please try again or provide more detail.";
         } finally {
             setIsVerifying(false);
         }

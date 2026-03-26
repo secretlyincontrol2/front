@@ -7,6 +7,7 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Select } from "../ui/select";
 import { updateOnboarding } from "@/lib/api";
+import { updateLocalUser } from "@/lib/auth";
 import { QuestionCard } from "./question-card";
 
 type StudyMode = "visual" | "audio" | "text";
@@ -63,6 +64,9 @@ export function OnboardingForm() {
         readerType: state.readerType || undefined,
         school: "Babcock University", // Ensure this is set to mark onboarding as complete
       });
+
+      // Update local storage so the UI knows we are onboarded
+      updateLocalUser({ isOnboarded: true });
 
       toast.success("Preferences saved!", {
         description: "Your tutor will now adapt sessions to your reading habit.",

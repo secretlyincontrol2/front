@@ -78,6 +78,7 @@ export interface PracticeQuestion {
     explanation: string;
     imageUrl?: string;
     diagram?: string;
+    topic?: string;
 }
 
 export interface UserProgress {
