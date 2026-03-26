@@ -23,11 +23,13 @@ export default function DashboardPage() {
     if (user?._id) {
       getProgress(user._id)
         .then((progress) => {
-          const hours = Math.floor(progress.totalStudyMinutes / 60);
-          const mins = Math.round(progress.totalStudyMinutes % 60);
+          if (!progress) return;
+          const studyMins = progress.totalStudyMinutes || 0;
+          const hours = Math.floor(studyMins / 60);
+          const mins = Math.round(studyMins % 60);
           setStudyTime(hours > 0 ? `${hours} hr ${mins} min` : `${mins} min`);
-          setPracticePoints(`${progress.totalPracticePoints} pts`);
-          setStreak(progress.streak);
+          setPracticePoints(`${progress.totalPracticePoints || 0} pts`);
+          setStreak(progress.streak || 0);
         })
         .catch(() => {
           // Fallback if API fails

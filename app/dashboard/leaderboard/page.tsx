@@ -27,17 +27,20 @@ export default function LeaderboardPage() {
     const currentUser = getUser();
 
     getLeaderboard(10)
-      .then((data: LeaderboardEntry[]) => {
-        const mapped = data.map((entry) => {
-          const hours = Math.floor(entry.studyHoursTotal);
-          const mins = Math.round((entry.studyHoursTotal - hours) * 60);
+      .then((data: any) => {
+        // Defensive check: Handle both raw array and nested object (for old/new version compatibility)
+        const entries = Array.isArray(data) ? data : (data?.leaderboard || []);
+        
+        const mapped = entries.map((entry: any) => {
+          const hours = Math.floor(entry.studyHoursTotal || 0);
+          const mins = Math.round(((entry.studyHoursTotal || 0) - hours) * 60);
           return {
-            id: entry._id,
-            name: `${entry.firstname} ${entry.lastname.charAt(0)}.`,
+            id: entry._id || entry.userId,
+            name: entry.firstname ? `${entry.firstname} ${entry.lastname?.charAt(0)}.` : (entry.studentName || "Unknown"),
             department: entry.department || "Not specified",
-            points: entry.points,
+            points: entry.points || entry.leaderboardPoints || 0,
             hoursToday: hours > 0 ? `${hours} hr ${mins} min` : `${mins} min`,
-            isCurrentUser: currentUser?._id === entry._id,
+            isCurrentUser: currentUser?._id === (entry._id || entry.userId),
           };
         });
         setLeaders(mapped);
