@@ -4,8 +4,7 @@ import * as React from "react";
 import { AppShell } from "@/components/layout/app-shell";
 import { Medal, Trophy, User, X, GraduationCap, Award, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getLeaderboard } from "@/lib/api";
-import type { LeaderboardEntry } from "@/lib/api";
+import { getLeaderboard, type LeaderboardEntry } from "@/lib/api";
 import { getUser } from "@/lib/auth";
 
 interface Leader {
@@ -27,18 +26,18 @@ export default function LeaderboardPage() {
     const currentUser = getUser();
 
     getLeaderboard(10)
-      .then((data: any) => {
+      .then((data) => {
         // Defensive check: Handle both raw array and nested object (for old/new version compatibility)
-        let entries = Array.isArray(data) ? data : (data?.leaderboard || []);
+        let entries: LeaderboardEntry[] = Array.isArray(data) ? data : [];
         if (!Array.isArray(entries)) {
           entries = [];
         }
         
-        const mapped = entries.map((entry: any) => {
+        const mapped = entries.map((entry: LeaderboardEntry) => {
           const hours = Math.floor(entry.studyHoursTotal || 0);
           const mins = Math.round(((entry.studyHoursTotal || 0) - hours) * 60);
           return {
-            id: entry._id || entry.userId,
+            id: entry._id || entry.userId || "",
             name: entry.firstname ? `${entry.firstname} ${entry.lastname?.charAt(0)}.` : (entry.studentName || "Unknown"),
             department: entry.department || "Not specified",
             points: entry.points || entry.leaderboardPoints || 0,

@@ -95,6 +95,9 @@ export interface LeaderboardEntry {
     department?: string;
     points: number;
     studyHoursTotal: number;
+    userId?: string;
+    studentName?: string;
+    leaderboardPoints?: number;
 }
 
 export interface Course {
@@ -198,13 +201,20 @@ export async function uploadNoteForTutoring(
 
 /** LEADERBOARD */
 export async function getLeaderboard(limit: number = 10): Promise<LeaderboardEntry[]> {
-    const data = await apiFetch<any>(`/leaderboard?limit=${limit}`);
-    return data?.leaderboard || (Array.isArray(data) ? data : []);
+    const data = await apiFetch<{ success: boolean; leaderboard: LeaderboardEntry[] }>(`/leaderboard?limit=${limit}`);
+    return Array.isArray(data?.leaderboard) ? data.leaderboard : [];
 }
 
 /** PROGRESS */
-export async function getProgress(studentId: string): Promise<UserProgress> {
-    const data = await apiFetch<{ success: boolean; performance: any }>("/performance/me");
+interface PerformanceData {
+    totalStudyMinutes?: number;
+    leaderboardPoints?: number;
+    currentStreak?: number;
+    strongTopics?: string[];
+}
+
+export async function getProgress(_studentId: string): Promise<UserProgress> {
+    const data = await apiFetch<{ success: boolean; performance: PerformanceData }>("/performance/me");
     if (data.success && data.performance) {
         return {
             totalStudyMinutes: data.performance.totalStudyMinutes || 0,
