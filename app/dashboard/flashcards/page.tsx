@@ -62,9 +62,28 @@ export default function FlashcardsPage() {
               <RefreshCw className="h-4 w-4" />
               Shuffle
             </Button>
-            <Button size="sm" className="h-9 gap-2">
+            <Button
+              size="sm"
+              className="h-9 gap-2"
+              disabled={generating || !selection?.course}
+              onClick={async () => {
+                if (!selection?.course) return;
+                setGenerating(true);
+                try {
+                  const { generateFlashcards: genCards } = await import("@/lib/api");
+                  const result = await genCards(selection.course, "general");
+                  if (result.cards && result.cards.length > 0) {
+                    setFlashcards(prev => [...prev, ...result.cards]);
+                  }
+                } catch (err) {
+                  console.error("Failed to generate flashcards:", err);
+                } finally {
+                  setGenerating(false);
+                }
+              }}
+            >
               <Play className="h-4 w-4" />
-              Study Now
+              {generating ? "Generating..." : "Generate More"}
             </Button>
           </div>
         </section>
