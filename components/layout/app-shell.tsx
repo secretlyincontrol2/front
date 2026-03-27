@@ -34,6 +34,9 @@ export function AppShell({ children, showAuthCta }: AppShellProps) {
       <Link href="/dashboard/practice" className="hover:text-primary transition-colors">
         Practice
       </Link>
+      <Link href="/dashboard/flashcards" className="hover:text-primary transition-colors">
+        Flashcards
+      </Link>
       <Link href="/dashboard/leaderboard" className="hover:text-primary transition-colors">
         Leaderboard
       </Link>
