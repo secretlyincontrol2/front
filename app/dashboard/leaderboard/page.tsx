@@ -29,7 +29,10 @@ export default function LeaderboardPage() {
     getLeaderboard(10)
       .then((data: any) => {
         // Defensive check: Handle both raw array and nested object (for old/new version compatibility)
-        const entries = Array.isArray(data) ? data : (data?.leaderboard || []);
+        let entries = Array.isArray(data) ? data : (data?.leaderboard || []);
+        if (!Array.isArray(entries)) {
+          entries = [];
+        }
         
         const mapped = entries.map((entry: any) => {
           const hours = Math.floor(entry.studyHoursTotal || 0);

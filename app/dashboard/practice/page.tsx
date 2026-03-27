@@ -239,12 +239,11 @@ export default function PracticePage() {
                      </div>
 
                      {currentQuestion.imageUrl && (
-                        <div className="relative mt-4 h-48 w-full overflow-hidden rounded-2xl border border-border bg-slate-100">
-                           <Image 
+                        <div className="relative mt-4 flex h-64 w-full items-center justify-center overflow-hidden rounded-2xl border border-border bg-slate-100 p-2">
+                           <img 
                               src={currentQuestion.imageUrl} 
-                              alt="Question Image" 
-                              fill 
-                              className="object-contain"
+                              alt="Question Illustration" 
+                              className="max-h-full max-w-full object-contain rounded-xl"
                            />
                         </div>
                      )}

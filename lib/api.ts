@@ -198,8 +198,8 @@ export async function uploadNoteForTutoring(
 
 /** LEADERBOARD */
 export async function getLeaderboard(limit: number = 10): Promise<LeaderboardEntry[]> {
-    const data = await apiFetch<{ success: boolean; leaderboard: LeaderboardEntry[] }>(`/leaderboard?limit=${limit}`);
-    return data.leaderboard || [];
+    const data = await apiFetch<any>(`/leaderboard?limit=${limit}`);
+    return data?.leaderboard || (Array.isArray(data) ? data : []);
 }
 
 /** PROGRESS */
