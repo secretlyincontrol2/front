@@ -11,6 +11,7 @@ import { useCourseSelection } from "@/lib/hooks/use-course-selection";
 export default function FlashcardsPage() {
   const [flashcards, setFlashcards] = React.useState<Flashcard[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const [generating, setGenerating] = React.useState(false);
   const [revealed, setRevealed] = React.useState<Record<string, boolean>>({});
   const { selection } = useCourseSelection();
 
@@ -81,15 +82,39 @@ export default function FlashcardsPage() {
             <div className="space-y-2">
               <h2 className="text-xl font-bold text-slate-900">Your deck is empty</h2>
               <p className="max-w-md mx-auto text-sm text-muted-foreground">
-                Start a <span className="text-primary font-medium">Practice Session</span> or upload notes to generate your first set of flashcards.
+                Generate flashcards for your selected course, or start a <span className="text-primary font-medium">Practice Session</span> first.
               </p>
             </div>
-            <Button
-              className="px-8"
-              onClick={() => window.location.href = "/dashboard/practice"}
-            >
-              Start Practice
-            </Button>
+            <div className="flex gap-3">
+              <Button
+                className="px-8"
+                disabled={generating || !selection?.course}
+                onClick={async () => {
+                  if (!selection?.course) return;
+                  setGenerating(true);
+                  try {
+                    const { generateFlashcards: genCards } = await import("@/lib/api");
+                    const result = await genCards(selection.course, "general");
+                    if (result.cards && result.cards.length > 0) {
+                      setFlashcards(result.cards);
+                    }
+                  } catch (err) {
+                    console.error("Failed to generate flashcards:", err);
+                  } finally {
+                    setGenerating(false);
+                  }
+                }}
+              >
+                {generating ? "Generating..." : "Generate Flashcards"}
+              </Button>
+              <Button
+                variant="outline"
+                className="px-8"
+                onClick={() => window.location.href = "/dashboard/practice"}
+              >
+                Start Practice
+              </Button>
+            </div>
           </section>
         ) : (
           <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

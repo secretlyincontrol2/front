@@ -244,6 +244,13 @@ export default function PracticePage() {
                               src={currentQuestion.imageUrl} 
                               alt="Question Illustration" 
                               className="max-h-full max-w-full object-contain rounded-xl"
+                              onError={(e) => {
+                                const target = e.currentTarget;
+                                target.style.display = "none";
+                                if (target.parentElement) {
+                                  target.parentElement.style.display = "none";
+                                }
+                              }}
                            />
                         </div>
                      )}
